@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id                String    @id @default(uuid())
+  name              String
+  email             String    @unique
+  password          String
+  role              Role
+  deleted_at        DateTime?
+  created_at        DateTime
+  updated_at        DateTime
+  isActive          Boolean
+
+  // Relations
+  comments          Comment[]
+}
+
+model Film {
+  id                String    @id @default(uuid())
+  title             String
+  poster            String?
+  description       String?
+  release_year      Int
+  duration          Int
+  rating            Int
+  creator           String
+  trailer           String?
+  deleted_at        DateTime?
+  created_at        DateTime
+  updated_at        DateTime
+
+  // Relations
+  genres_relations  GenreRelation[]
+  castings          Casting[]
+  comments          Comment[]
+}
+
+model Genre {
+  id                String    @id @default(uuid())
+  title             String
+  deleted_at        DateTime?
+  created_at        DateTime
+  updated_at        DateTime
+
+  // Relations
+  genres_relations  GenreRelation[]
+}
+
+model GenreRelation {
+  id                String    @id @default(uuid())
+  film_id           String
+  genre_id          String
+  created_at        DateTime
+  updated_at        DateTime
+
+  // Relations
+  film              Film      @relation(fields: [film_id], references: [id])
+  genre             Genre     @relation(fields: [genre_id], references: [id])
+}
+
+model Casting {
+  id                String    @id @default(uuid())
+  name              String
+  film_id           String
+  created_at        DateTime
+  updated_at        DateTime
+
+  // Relations
+  film              Film      @relation(fields: [film_id], references: [id])
+}
+
+model Comment {
+  id                String    @id @default(uuid())
+  comment           String
+  rating            CommentRating
+  user_id           String
+  film_id           String
+  created_at        DateTime
+  updated_at        DateTime
+
+  // Relations
+  user              users      @relation(fields: [user_id], references: [id])
+  film              Film      @relation(fields: [film_id], references: [id])
+}
+
+enum Role {
+  subs
+  admin
+  author
+}
+
+enum CommentRating {
+  bad
+  good
+  excellent
+}

@@ -1,0 +1,128 @@
+<script setup>
+import { ref, onMounted } from 'vue'
+
+const genres = ref([])
+
+const fetchGenres = async () => {
+    try {
+        const response = await fetch('/api/get/genre')
+        if (!response.ok) {
+            throw new Error('Failed to fetch genres')
+        }
+        const data = await response.json()
+        genres.value = data || []
+    } catch (error) {
+        console.error("Error fetching genres:", error)
+    }
+}
+
+onMounted(() => {
+    fetchGenres()
+})  
+
+const drawer = ref(null)
+const adminBar = ref(null)
+const genre = ref(null)
+
+const {  data , signOut  } = useAuth()
+
+</script>
+
+<template>
+    <v-navigation-drawer theme="customLight" :elevation="12" v-model="drawer">
+
+        <v-list v-if="data?.user?.name" nav>
+            <v-list-item>
+                <template v-slot:prepend>
+                    <v-avatar color="secondary">
+                        {{ data.user.name.split(' ').length > 1 ? data.user.name.split(' ')[0].charAt(0) + data.user.name.split(' ').slice(-1)[0].charAt(0) : data.user.name.charAt(0) }}
+                    </v-avatar>
+                </template>
+                <v-list-item-title>
+                    <span class="text-wrap">{{ data.user.name }}</span>
+                </v-list-item-title>
+            </v-list-item>
+        </v-list>
+
+        <v-list v-else nav>
+            <v-list-item to="/auth/login">
+                <template v-slot:prepend>
+                    <v-avatar color="secondary">
+                      <v-icon icon="mdi-account-circle"></v-icon>
+                    </v-avatar>
+                </template>
+                <v-list-item-title>
+                    <span class="text-wrap">Login or Register</span>
+                </v-list-item-title>
+            </v-list-item>
+        </v-list>
+
+        <v-divider></v-divider>
+
+        <v-list nav>
+            <v-list-item prepend-icon="mdi-home" to="/" nuxt>
+                <template v-slot:title>
+                    <span class="font-weight-bold">Home</span>
+                </template>
+            </v-list-item>
+        </v-list>
+
+        <v-divider></v-divider>
+
+        <v-list v-if="data?.user?.role === 'admin'" nav>
+            <v-list-item @click="adminBar = !adminBar" prepend-icon="mdi-shield-crown-outline" :append-icon="adminBar ? 'mdi-chevron-double-up' : 'mdi-chevron-double-down'">
+                <template v-slot:title>
+                    <span class="font-weight-bold text-wrap">Fitur Admin</span>
+                </template>
+            </v-list-item>
+            <v-card elevation="0" v-if="adminBar" class="align-center">
+                <v-list-item prepend-icon="mdi-plus" to="/admin/genre/add" title="Tambah Genre"></v-list-item>
+            </v-card>
+        </v-list>
+
+        <v-divider></v-divider>
+
+        <v-list nav class="overflow-y-auto" max-height="450px">
+            <v-list-item prepend-icon="mdi-shape-plus" :append-icon="genre ? 'mdi-chevron-double-up' : 'mdi-chevron-double-down'" @click="genre = !genre">
+                <template v-slot:title>
+                    <span class="font-weight-bold">Genre</span>
+                </template>
+            </v-list-item>
+            <v-card elevation="0" v-if="genre" class="align-center">
+                <v-list-item 
+                    v-for="(genre, index) in genres" 
+                    :key="index"
+                    :to="`/genre/${genre.id}`">
+                    <template v-slot:title>
+                        <span class="text-wrap">{{ genre.title }}</span>
+                    </template>
+                </v-list-item>
+            </v-card>
+        </v-list>
+
+        <v-divider></v-divider>
+
+        <v-list v-if="data?.user?.name" nav>
+            <v-list-item prepend-icon="mdi-logout-variant" @click="signOut({ callbackUrl: '/auth/login' })" title="Sign out"></v-list-item>
+        </v-list>
+    </v-navigation-drawer>
+
+
+    <v-app-bar elevation="0" color="transparent">
+      <div class="d-flex w-100 justify-space-between">
+        <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+        <v-hover>
+          <template v-slot:default="{ isHovering, props }">
+            <v-icon 
+              class="d-flex my-auto mr-3 cursor-pointer"
+              @click="drawer = !drawer" 
+              v-bind="props" 
+              :color="isHovering ? 'primary' : undefined" 
+              size="28" 
+              icon="mdi-magnify">
+            </v-icon>
+          </template>
+        </v-hover>
+      </div>
+    </v-app-bar>
+</template>
