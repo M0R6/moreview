@@ -76,7 +76,7 @@ const {  data , signOut  } = useAuth()
                 </template>
             </v-list-item>
             <v-card elevation="0" v-if="adminBar" class="align-center">
-                <v-list-item prepend-icon="mdi-plus" to="/admin/genre/add" title="Tambah Genre"></v-list-item>
+                <v-list-item prepend-icon="mdi-shape-plus" to="/admin/genre" title="Manage Genre"></v-list-item>
             </v-card>
         </v-list>
 
@@ -108,9 +108,13 @@ const {  data , signOut  } = useAuth()
     </v-navigation-drawer>
 
 
-    <v-app-bar elevation="0" color="transparent">
-      <div class="d-flex w-100 justify-space-between">
+    <v-app-bar elevation="0" color="white">
+      <div class="d-flex w-100 justify-space-between align-center">
         <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+        <div class="d-flex">
+            <img src="~/assets/img/logoku.png" width="50px">
+            <h2 class="font-bold align-center d-flex ml-2">Moreview</h2>
+        </div>
         <v-hover>
           <template v-slot:default="{ isHovering, props }">
             <v-icon 

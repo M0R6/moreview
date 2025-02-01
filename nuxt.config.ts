@@ -19,6 +19,8 @@ export default defineNuxtConfig({
         },
         '@sidebase/nuxt-auth',
         '@nuxtjs/google-fonts',
+    ],  plugins: [
+        '~/plugins/moment.js'
     ],
     auth: {
         provider: {

@@ -23,7 +23,11 @@
     "@nuxt/icon": "^1.9.1",
     "@prisma/client": "^4.15.0",
     "bcrypt": "^5.1.0",
-    "vite-plugin-vuetify": "^1.0.2",
-    "vuetify": "^3.3.1"
+    "moment": "^2.30.1",
+    "moment-locales-webpack-plugin": "^1.2.0",
+    "moment-timezone": "^0.5.47",
+    "vite": "^6.0.11",
+    "vite-plugin-vuetify": "^2.0.4",
+    "vuetify": "^3.7.9"
   }
 }

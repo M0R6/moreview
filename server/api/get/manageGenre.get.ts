@@ -4,11 +4,7 @@ const prisma = new PrismaClient()
 
 export default defineEventHandler(async () => {
     try {
-        const genres = await prisma.genre.findMany({
-            where: {
-                deleted_at: null
-            }
-        })   
+        const genres = await prisma.genre.findMany()   
         return genres
     } catch (error) {
         console.error("Error fetching genres:", error)
