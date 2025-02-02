@@ -72,7 +72,7 @@ const {  data , signOut  } = useAuth()
         <v-list v-if="data?.user?.role === 'admin'" nav>
             <v-list-item @click="adminBar = !adminBar" prepend-icon="mdi-shield-crown-outline" :append-icon="adminBar ? 'mdi-chevron-double-up' : 'mdi-chevron-double-down'">
                 <template v-slot:title>
-                    <span class="font-weight-bold text-wrap">Fitur Admin</span>
+                    <span class="font-weight-bold text-wrap">Admin Features</span>
                 </template>
             </v-list-item>
             <v-card elevation="0" v-if="adminBar" class="align-center">

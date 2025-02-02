@@ -22,8 +22,9 @@ const addGenre = async () => {
     }
     showToast(data.value.message)
     window.location.reload()
-    
 }
+
+
 
 const deleteGenre = async (id) => {
    try {
@@ -45,18 +46,48 @@ const deleteGenre = async (id) => {
 
 const restoreItem = async (id) => {
    try {
-      const response = await fetch(`/api/restore/genre/${id}`, {
-         method: 'POST',
+      const response = await fetch(`/api/genre/restore/${id}`, {
+         method: 'PATCH',
       })
       if (!response.ok) {
          throw new Error('Failed to restore genre')
       }
       showToast('Genre restored successfully', 'success')
-      fetchGenres()
+      window.location.reload()
    } catch (error) {
       console.error('Error restoring genre:', error)
       showToast('Error restoring genre', 'error')
    }
+}
+
+const editItemDialog = ref(false)
+const editForm = ref(false)
+const editTitle = ref('')
+const editId = ref(null)
+
+// Function to open the edit dialog and pre-fill the form
+const editItem = (item) => {
+    editTitle.value = item.title
+    editId.value = item.id
+    editItemDialog.value = true
+}
+
+// Function to send the update request to the backend
+const updateGenre = async () => {
+    const { data, error } = await useFetch(`/api/genre/update/${editId.value}`, {
+        method: "PATCH",
+        body: {
+            title: editTitle.value,
+        }
+    })
+
+    if (error.value) {
+        showToast(error.value.statusMessage, 'error')
+        return
+    }
+    showToast(data.value.message)
+    editItemDialog.value = false
+    window.location.reload()
 }
 
 onMounted(() => {
@@ -74,9 +105,9 @@ const formatDate = (date) => {
     const momentDate = $moment.utc(date).tz('Asia/Jakarta').locale('id')
 
     if (momentDate.isSame($moment(), 'day')) {
-        return `Today at ${momentDate.format('HH:mm')}`
+        return `Today at ${momentDate.format('HH:mm:ss')}`
     } else if (momentDate.isSame($moment().subtract(1, 'day'), 'day')) {
-        return `Yesterday at ${momentDate.format('HH:mm')}`
+        return `Yesterday at ${momentDate.format('HH:mm:ss')}`
     } else {
         return momentDate.format('LLLL')
     }
@@ -128,7 +159,7 @@ onMounted(() => {
             </v-card-text>
          </v-card>
       </v-dialog>
-      <v-card color="white" elevation="2">
+      <v-card color="white" elevation="4">
          <v-card-title class="d-flex justify-space-between flex-wrap">
             <div class="d-flex flex-wrap">
                <div class="d-flex align-center" width="100%">   
@@ -156,7 +187,7 @@ onMounted(() => {
             </div>
          </v-card-title>
          <v-data-table
-         style="background-color: white;"
+         style="background-color: transparent;"
          :headers="[
             { title: 'No.', align: 'start', sortable: false, key: 'index' },
             { title: 'Title', align: 'start', sortable: true, key: 'title' },
@@ -188,6 +219,25 @@ onMounted(() => {
          <template v-slot:item.actions="{ item }">
             <v-btn class="ma-1" icon @click="editItem(item)">
                <v-icon>mdi-pencil</v-icon>
+               <v-dialog v-model="editItemDialog">
+                  <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+                     <v-card-title class="d-flex align-center">
+                        <v-icon class="mr-2">mdi-pencil</v-icon>
+                        <h2 class="text-wrap">Edit Genre</h2>
+                     </v-card-title>
+                     <v-card-text>
+                        <v-form v-model="editForm" @submit.prevent="updateGenre">
+                           <v-text-field
+                                 v-model="editTitle"
+                                 label="Title"
+                                 required
+                                 variant="outlined"
+                           ></v-text-field>
+                           <v-btn type="submit" color="primary">Update Genre</v-btn>
+                        </v-form>
+                     </v-card-text>
+                  </v-card>
+               </v-dialog>
             </v-btn>
             <v-btn v-if="item.deleted_at === null" class="ma-1" icon @click="areYouSure = true" color="error">
                <v-icon>mdi-delete</v-icon>
@@ -207,7 +257,7 @@ onMounted(() => {
                   </v-card>
                </v-dialog>
             </v-btn>
-            <v-btn v-else class="ma-1" icon @click="restoreItem(item)" color="success">
+            <v-btn v-else class="ma-1" icon @click="restoreItem(item.id)" color="success">
                <v-icon>mdi-restore</v-icon>
             </v-btn>
          </template>
