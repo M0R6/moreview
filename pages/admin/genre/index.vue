@@ -9,7 +9,7 @@ const title = ref('')
 const form = ref(false)
 
 const addGenre = async () => {
-    const { data, error } = await useFetch(`/api/add/genre`, {
+    const { data, error } = await useFetch(`/api/genre/add`, {
         method: "POST",
         body: {
             title: title.value,
@@ -23,6 +23,40 @@ const addGenre = async () => {
     showToast(data.value.message)
     window.location.reload()
     
+}
+
+const deleteGenre = async (id) => {
+   try {
+      const response = await fetch(`/api/genre/delete/${id}`, {
+         method: 'PATCH',
+      })
+
+      if (!response.ok) {
+         throw new Error('Failed to update genre')
+      }
+
+      showToast('Genre updated successfully', 'success')
+      window.location.reload()
+   } catch (error) {
+      console.error('Error updating genre:', error)
+      showToast('Error updating genre', 'error')
+   }
+}
+
+const restoreItem = async (id) => {
+   try {
+      const response = await fetch(`/api/restore/genre/${id}`, {
+         method: 'POST',
+      })
+      if (!response.ok) {
+         throw new Error('Failed to restore genre')
+      }
+      showToast('Genre restored successfully', 'success')
+      fetchGenres()
+   } catch (error) {
+      console.error('Error restoring genre:', error)
+      showToast('Error restoring genre', 'error')
+   }
 }
 
 onMounted(() => {
@@ -44,7 +78,7 @@ const formatDate = (date) => {
     } else if (momentDate.isSame($moment().subtract(1, 'day'), 'day')) {
         return `Yesterday at ${momentDate.format('HH:mm')}`
     } else {
-        return momentDate.format('DD MMMM YYYY HH:mm:ss') // e.g., 10 Juli 2024 20:45:00
+        return momentDate.format('LLLL')
     }
 }
 
@@ -52,16 +86,17 @@ const genres = ref([])
 const search = ref('')
 const loading = ref(true)
 const addItem = ref(false)
+const areYouSure = ref(false)
 
 const fetchGenres = async () => {
     try {
-        const response = await fetch('/api/get/manageGenre')
+        const response = await fetch('/api/genre/manageGenre')
         loading.value = false
         if (!response.ok) {
             throw new Error('Failed to fetch genres')
         }
         const data = await response.json()
-        console.log("Fetched Data:", data) // 🔍 See what the API returns
+        console.log("Fetched Data:", data)
         genres.value = data || []
     } catch (error) {
         console.error("Error fetching genres:", error)
@@ -73,11 +108,12 @@ onMounted(() => {
 })  
 </script>
 <template>
-   <v-container>
+   <v-container v-if="isAdmin">
       <v-dialog v-model="addItem">
-         <v-card class="d-flex mx-auto my-auto" width="500px">
-            <v-card-title>
-                <h2>Add Genre</h2>
+         <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+            <v-card-title class="d-flex align-center">
+               <v-icon class="mr-2">mdi-plus</v-icon>
+               <h2 class="text-wrap">Add Genre</h2>
             </v-card-title>
             <v-card-text>
                 <v-form v-model="form" @submit.prevent="addGenre">
@@ -85,6 +121,7 @@ onMounted(() => {
                         v-model="title"
                         label="Title"
                         required
+                        variant="outlined"
                     ></v-text-field>
                     <v-btn type="submit" color="primary">Add Genre</v-btn>
                 </v-form>
@@ -99,7 +136,7 @@ onMounted(() => {
                   <v-chip color="primary">{{ genres.length }}</v-chip>
                </div>
                <div class="align-center d-flex mt-2 mt-md-0 ml-0 ml-md-5">
-                  <v-btn color="primary" @click="addItem = true">Add Genre</v-btn>
+                  <v-btn color="primary" @click="addItem = true" icon="mdi-plus"></v-btn>
                </div>
             </div>
             <div>
@@ -152,8 +189,23 @@ onMounted(() => {
             <v-btn class="ma-1" icon @click="editItem(item)">
                <v-icon>mdi-pencil</v-icon>
             </v-btn>
-            <v-btn v-if="item.deleted_at === null" class="ma-1" icon @click="deleteItem(item)" color="error">
+            <v-btn v-if="item.deleted_at === null" class="ma-1" icon @click="areYouSure = true" color="error">
                <v-icon>mdi-delete</v-icon>
+               <v-dialog v-model="areYouSure">
+                  <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+                     <v-card-title class="d-flex align-center">
+                        <v-icon class="mr-2">mdi-alert</v-icon>
+                        <h2 class="text-wrap">Are you sure?</h2>
+                     </v-card-title>
+                     <v-card-text class="pt-0">
+                        <p>Are you sure you want to delete this genre?</p>
+                        <div class="mt-3">
+                           <v-btn class="mr-3" color="error" @click="deleteGenre(item.id)">Yes</v-btn>
+                           <v-btn @click="areYouSure = false">No</v-btn>
+                        </div>
+                     </v-card-text>
+                  </v-card>
+               </v-dialog>
             </v-btn>
             <v-btn v-else class="ma-1" icon @click="restoreItem(item)" color="success">
                <v-icon>mdi-restore</v-icon>

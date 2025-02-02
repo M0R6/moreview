@@ -5,7 +5,7 @@ const genres = ref([])
 
 const fetchGenres = async () => {
     try {
-        const response = await fetch('/api/get/genre')
+        const response = await fetch('/api/genre/getGenre')
         if (!response.ok) {
             throw new Error('Failed to fetch genres')
         }
@@ -102,9 +102,11 @@ const {  data , signOut  } = useAuth()
 
         <v-divider></v-divider>
 
-        <v-list v-if="data?.user?.name" nav>
-            <v-list-item prepend-icon="mdi-logout-variant" @click="signOut({ callbackUrl: '/auth/login' })" title="Sign out"></v-list-item>
-        </v-list>
+        <v-card color="error" class="ma-3" elevation="0">
+            <v-list v-if="data?.user?.name" nav>
+                <v-list-item prepend-icon="mdi-logout-variant" @click="signOut({ callbackUrl: '/auth/login' })" title="Sign out"></v-list-item>
+            </v-list>
+        </v-card>
     </v-navigation-drawer>
 
 
