@@ -16,13 +16,25 @@ export default NuxtAuthHandler({
       async authorize (credentials: any) {
 
         const user = await prisma.users.findUnique({
-          where: { email: credentials?.email },
+          where: {
+            email: credentials?.email,
+          },
         })
 
         if(!user) {
           throw createError({
             statusCode: 403,
             statusMessage: "Credentials not working",
+          })
+
+        }
+
+        const userDeleted = user.deleted_at !== null
+
+        if (userDeleted) {
+          throw createError({
+            statusCode: 403,
+            statusMessage: "Credentials not working (User deleted)",
           })
 
         }
@@ -37,9 +49,9 @@ export default NuxtAuthHandler({
 
         }
 
-        const isUserActive = user.isActive === true
+        const UserActive = user.isActive === true
 
-        if (!isUserActive) {
+        if (!UserActive) {
           throw createError({
             statusCode: 403,
             statusMessage: "This user has been deactivated, please contact the admin",

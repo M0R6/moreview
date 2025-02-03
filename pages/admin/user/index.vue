@@ -5,14 +5,21 @@ const { $moment } = useNuxtApp()
 const { data } = useAuth()
 const isAdmin = computed(() => data.value?.user?.role === 'admin')
 const showToast = inject('showToast')
-const title = ref('')
+const name = ref('')
+const email = ref('')
+const role = ref('subs')
+const password = ref('')
 const form = ref(false)
+const addDialog = ref(false)
 
-const addGenre = async () => {
-    const { data, error } = await useFetch(`/api/genre/add`, {
+const addUser = async () => {
+    const { data, error } = await useFetch(`/api/user/add`, {
         method: "POST",
         body: {
-            title: title.value,
+            name: name.value,
+            email: email.value,
+            role: role.value,
+            password: password.value,
         }
     })
 
@@ -24,11 +31,9 @@ const addGenre = async () => {
     window.location.reload()
 }
 
-
-
-const deleteGenre = async (id) => {
+const deleteUser = async (id) => {
    try {
-      const response = await fetch(`/api/genre/delete/${id}`, {
+      const response = await fetch(`/api/user/delete/${id}`, {
          method: 'PATCH',
       })
 
@@ -36,17 +41,53 @@ const deleteGenre = async (id) => {
          throw new Error('Failed to delete genre')
       }
 
-      showToast('Genre deleted successfully', 'success')
+      showToast('Genre updated successfully', 'success')
       window.location.reload()
    } catch (error) {
-      console.error('Error deleting genre:', error)
-      showToast('Error deleting genre', 'error')
+      console.error('Error updating genre:', error)
+      showToast('Error updating genre', 'error')
+   }
+}
+
+const banUser = async (id) => {
+   try {
+      const response = await fetch(`/api/user/ban/${id}`, {
+         method: 'PATCH',
+      })
+
+      if (!response.ok) {
+         throw new Error('Failed to ban user')
+      }
+
+      showToast('User banned successfully', 'success')
+      window.location.reload()
+   } catch (error) {
+      console.error('Error to unban user:', error)
+      showToast('Error to unban user:', 'error')
+   }
+}
+
+const unbanUser = async (id) => {
+   try {
+      const response = await fetch(`/api/user/unban/${id}`, {
+         method: 'PATCH',
+      })
+
+      if (!response.ok) {
+         throw new Error('Failed to unban user')
+      }
+
+      showToast('User unbanned successfully', 'success')
+      window.location.reload()
+   } catch (error) {
+      console.error('Error to unban user', error)
+      showToast('Error to unban user', 'error')
    }
 }
 
 const restoreItem = async (id) => {
    try {
-      const response = await fetch(`/api/genre/restore/${id}`, {
+      const response = await fetch(`/api/user/restore/${id}`, {
          method: 'PATCH',
       })
       if (!response.ok) {
@@ -62,29 +103,47 @@ const restoreItem = async (id) => {
 
 const editItemDialog = ref(false)
 const editForm = ref(false)
-const editTitle = ref('')
+const editName = ref('')
+const editEmail = ref('')
+const editRole = ref('')
 const editId = ref(null)
+const editPass = ref('')
 
-// Function to open the edit dialog and pre-fill the form
 const editItem = (item) => {
-    editTitle.value = item.title
+    editName.value = item.name
+    editEmail.value = item.email
+    editRole.value = item.role
     editId.value = item.id
+    editPass.value = ''
     editItemDialog.value = true
 }
 
-// Function to send the update request to the backend
-const updateGenre = async () => {
-    const { data, error } = await useFetch(`/api/genre/update/${editId.value}`, {
+const updateUser = async () => {
+    // Prepare the request body
+    const requestBody = {
+        name: editName.value,
+        email: editEmail.value,
+        role: editRole.value,
+    }
+
+    // Only include the password if it's not empty
+    if (editPass.value) {
+        requestBody.password = editPass.value
+    }
+
+    // Send the request
+    const { data, error } = await useFetch(`/api/user/update/${editId.value}`, {
         method: "PATCH",
-        body: {
-            title: editTitle.value,
-        }
+        body: requestBody,
     })
 
+    // Handle errors
     if (error.value) {
         showToast(error.value.statusMessage, 'error')
         return
     }
+
+    // Show success message and reload the page
     showToast(data.value.message)
     editItemDialog.value = false
     window.location.reload()
@@ -113,29 +172,29 @@ const formatDate = (date) => {
     }
 }
 
-const genres = ref([])
+const users = ref([])
 const search = ref('')
 const loading = ref(true)
 const addItem = ref(false)
 const areYouSure = ref(false)
 
-const fetchGenres = async () => {
+const fetchUsers = async () => {
     try {
-        const response = await fetch('/api/genre/manageGenre')
+        const response = await fetch('/api/user/manageUser')
         loading.value = false
         if (!response.ok) {
             throw new Error('Failed to fetch genres')
         }
         const data = await response.json()
         console.log("Fetched Data:", data)
-        genres.value = data || []
+        users.value = data || []
     } catch (error) {
         console.error("Error fetching genres:", error)
     }
 }
 
 onMounted(() => {
-    fetchGenres()
+    fetchUsers()
 })  
 </script>
 <template>
@@ -159,15 +218,53 @@ onMounted(() => {
             </v-card-text>
          </v-card>
       </v-dialog>
+      <v-dialog v-model="addDialog">
+         <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+            <v-card-title class="d-flex align-center">
+               <v-icon class="mr-2">mdi-plus</v-icon>
+               <h2 class="text-wrap">Add User</h2>
+            </v-card-title>
+            <v-card-text>
+               <v-form v-model="form" @submit.prevent="addUser">
+                  <v-text-field
+                     v-model="name"
+                     label="Name"
+                     required
+                     variant="outlined"
+                  ></v-text-field>
+                  <v-text-field
+                     v-model="email"
+                     label="E-mail"
+                     required
+                     variant="outlined"
+                  ></v-text-field>
+                  <v-select
+                     v-model="role"
+                     :items="['admin', 'author', 'subs']"
+                     label="Role"
+                     required
+                     variant="outlined"
+                  ></v-select>
+                  <v-text-field
+                     v-model="password"
+                     label="Password"
+                     type="password"
+                     variant="outlined"
+                  ></v-text-field>
+                  <v-btn type="submit" color="primary">Add User</v-btn>
+               </v-form>
+            </v-card-text>
+         </v-card>
+      </v-dialog>
       <v-card color="white" elevation="4">
          <v-card-title class="d-flex justify-space-between flex-wrap">
             <div class="d-flex flex-wrap">
                <div class="d-flex align-center" width="100%">   
-                  <h2 class="mr-2">Movie Genres</h2>
-                  <v-chip color="primary">{{ genres.length }}</v-chip>
+                  <h2 class="mr-2">Users</h2>
+                  <v-chip color="primary">{{ users.length }}</v-chip>
                </div>
                <div class="align-center d-flex mt-2 mt-md-0 ml-0 ml-md-5">
-                  <v-btn color="primary" @click="addItem = true" icon="mdi-plus"></v-btn>
+                  <v-btn color="primary" @click="addDialog = true" icon="mdi-plus"></v-btn>
                </div>
             </div>
             <div>
@@ -190,21 +287,28 @@ onMounted(() => {
          style="background-color: transparent;"
          :headers="[
             { title: 'No.', align: 'start', sortable: false, key: 'index' },
-            { title: 'Title', align: 'start', sortable: true, key: 'title' },
+            { title: 'Name', align: 'start', sortable: false, key: 'name' },
+            { title: 'Email', align: 'start', sortable: true, key: 'email' },
+            { title: 'Role', align: 'start', sortable: true, key: 'role' },
+            { title: 'Status', align: 'start', sortable: true, key: 'isActive' },
             { title: 'Created Date', align: 'start', sortable: true, key: 'created_at' },
             { title: 'Updated Date', align: 'start', sortable: true, key: 'updated_at' },
             { title: 'Deleted Date', align: 'start', sortable: true, key: 'deleted_at' },
             { title: 'Actions', align: 'start', sortable: false, key: 'actions' }
          ]"
          :search="search"
-         :items="genres"
+         :items="users"
          :loading="loading"
          >
-         <!-- Row Numbering -->
          <template v-slot:item.index="{ index }">
             {{ index + 1 }}
          </template>
-         <!-- Date Formatting -->
+         <template v-slot:item.role="{ item }">
+            {{ item.role === 'subs' ? 'Subscriber' : item.role === 'author' ? 'Author' : 'Admin' }}
+         </template>
+         <template v-slot:item.isActive="{ item }">
+            {{ item.isActive === true ? 'Active' : 'Inactive / Banned' }}
+         </template>
          <template v-slot:item.created_at="{ item }">
             {{ console.log(item) }}
             {{ formatDate(item.created_at) }}
@@ -215,7 +319,6 @@ onMounted(() => {
          <template v-slot:item.deleted_at="{ item }">
             {{ item.deleted_at ? formatDate(item.deleted_at) : '-' }}
          </template>
-         <!-- Actions Column -->
          <template v-slot:item.actions="{ item }">
             <v-btn class="ma-1" icon @click="editItem(item)">
                <v-icon>mdi-pencil</v-icon>
@@ -226,18 +329,43 @@ onMounted(() => {
                         <h2 class="text-wrap">Edit Genre</h2>
                      </v-card-title>
                      <v-card-text>
-                        <v-form v-model="editForm" @submit.prevent="updateGenre">
+                        <v-form v-model="editForm" @submit.prevent="updateUser">
                            <v-text-field
-                                 v-model="editTitle"
-                                 label="Title"
-                                 required
-                                 variant="outlined"
+                              v-model="editName"
+                              label="Name"
+                              required
+                              variant="outlined"
+                           ></v-text-field>
+                           <v-text-field
+                              v-model="editEmail"
+                              label="E-mail"
+                              required
+                              variant="outlined"
+                           ></v-text-field>
+                           <v-select
+                              v-model="editRole"
+                              :items="['admin', 'author', 'subs']"
+                              label="Role"
+                              required
+                              variant="outlined"
+                           ></v-select>
+                           <v-text-field
+                              v-model="editPass"
+                              label="Password"
+                              type="password"
+                              variant="outlined"
                            ></v-text-field>
                            <v-btn type="submit" color="primary">Update Genre</v-btn>
                         </v-form>
                      </v-card-text>
                   </v-card>
                </v-dialog>
+            </v-btn>
+            <v-btn v-if="item.isActive === true" @click="banUser(item.id)" icon color="secondary">
+               <v-icon>mdi-cancel</v-icon>
+            </v-btn>
+            <v-btn icon v-else @click="unbanUser(item.id)" color="success">
+               <v-icon>mdi-check-circle-outline</v-icon>
             </v-btn>
             <v-btn v-if="item.deleted_at === null" class="ma-1" icon @click="areYouSure = true" color="error">
                <v-icon>mdi-delete</v-icon>
@@ -250,7 +378,7 @@ onMounted(() => {
                      <v-card-text class="pt-0">
                         <p>Are you sure you want to delete this genre?</p>
                         <div class="mt-3">
-                           <v-btn class="mr-3" color="error" @click="deleteGenre(item.id)">Yes</v-btn>
+                           <v-btn class="mr-3" color="error" @click="deleteUser(item.id)">Yes</v-btn>
                            <v-btn @click="areYouSure = false">No</v-btn>
                         </div>
                      </v-card-text>

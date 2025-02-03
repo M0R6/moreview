@@ -76,7 +76,9 @@ const {  data , signOut  } = useAuth()
                 </template>
             </v-list-item>
             <v-card elevation="0" v-if="adminBar" class="align-center">
+                <v-list-item prepend-icon="mdi-movie-roll" to="/admin/movie" title="Manage Movie"></v-list-item>
                 <v-list-item prepend-icon="mdi-shape-plus" to="/admin/genre" title="Manage Genre"></v-list-item>
+                <v-list-item prepend-icon="mdi-account-box-multiple" to="/admin/user" title="Manage User"></v-list-item>
             </v-card>
         </v-list>
 
