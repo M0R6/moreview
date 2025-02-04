@@ -1,5 +1,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useHead } from '#imports';
+
+useHead({
+title: 'Manage User - Moreview',
+  meta: [
+    { name: 'description', content: 'Admin - Manage User' },
+    { name: 'keywords', content: 'Moreview, Manage User, Account' },
+  ]
+});
 
 const { $moment } = useNuxtApp()
 const { data } = useAuth()

@@ -1,5 +1,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useHead } from '#imports';
+
+useHead({
+title: 'Manage Genre - Moreview',
+  meta: [
+    { name: 'description', content: 'Admin manage genre on Moreview' },
+    { name: 'keywords', content: 'Moreview, Manage genre, genre, Account' },
+  ]
+});
 
 const { $moment } = useNuxtApp()
 const { data } = useAuth()

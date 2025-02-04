@@ -23,6 +23,7 @@ onMounted(() => {
 const drawer = ref(null)
 const adminBar = ref(null)
 const genre = ref(null)
+const dialogSignOut = ref(false)
 
 const {  data , signOut  } = useAuth()
 
@@ -32,6 +33,13 @@ const {  data , signOut  } = useAuth()
     <v-navigation-drawer theme="customLight" :elevation="12" v-model="drawer">
 
         <v-list v-if="data?.user?.name" nav>
+            <v-menu activator="parent">
+              <v-list>
+                <v-list-item to="/profile">
+                  <v-list-item-title>Edit Profile</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
             <v-list-item>
                 <template v-slot:prepend>
                     <v-avatar color="secondary">
@@ -60,7 +68,7 @@ const {  data , signOut  } = useAuth()
         <v-divider></v-divider>
 
         <v-list nav>
-            <v-list-item prepend-icon="mdi-home" to="/" nuxt>
+            <v-list-item prepend-icon="mdi-home" :to="data?.user ? '/' : '#'" nuxt>
                 <template v-slot:title>
                     <span class="font-weight-bold">Home</span>
                 </template>
@@ -105,8 +113,18 @@ const {  data , signOut  } = useAuth()
         <v-divider></v-divider>
 
         <v-card color="error" class="ma-3" elevation="0">
+            <v-dialog v-model="dialogSignOut">
+                <v-card class="d-flex mx-auto" max-width="100%" width="400px">
+                    <v-card-title>Sign Out</v-card-title>
+                    <v-card-text>Are you sure you want to sign out?</v-card-text>
+                    <v-card-actions>
+                        <v-btn @click="dialogSignOut = false">Cancel</v-btn>
+                        <v-btn @click="signOut({ callbackUrl: '/auth/login' })">Sign Out</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
             <v-list v-if="data?.user?.name" nav>
-                <v-list-item prepend-icon="mdi-logout-variant" @click="signOut({ callbackUrl: '/auth/login' })" title="Sign out"></v-list-item>
+                <v-list-item prepend-icon="mdi-logout-variant" @click="dialogSignOut = true" title="Sign out"></v-list-item>
             </v-list>
         </v-card>
     </v-navigation-drawer>
@@ -127,7 +145,8 @@ const {  data , signOut  } = useAuth()
               v-bind="props" 
               :color="isHovering ? 'primary' : undefined" 
               size="28" 
-              icon="mdi-magnify">
+              icon="mdi-magnify"
+              >
             </v-icon>
           </template>
         </v-hover>
