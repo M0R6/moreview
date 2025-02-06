@@ -4,9 +4,9 @@ export default defineEventHandler(async (event) => {
      throw new Error('ID parameter is missing');
    }
  
-   const film = await prisma.users.findUnique({
+   const user = await prisma.users.findUnique({
      where: { id }
    });
  
-   return film;
+   return user;
  });

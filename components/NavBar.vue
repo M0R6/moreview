@@ -67,7 +67,8 @@ const user = ref([])
                     </v-avatar>
                 </template>
                 <v-list-item-title>
-                    <span class="text-wrap">{{ user.name }}</span>
+                    <span class="text-wrap font-weight-bold">{{ user.name }}</span> <br>
+                    <span class="text-wrap">{{ user.email }}</span>
                 </v-list-item-title>
             </v-list-item>
         </v-list>

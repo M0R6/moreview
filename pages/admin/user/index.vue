@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useHead } from '#imports';
 import { refreshNuxtData } from '#imports';
 
@@ -11,30 +11,35 @@ title: 'Manage User - Moreview',
   ]
 });
 
-
 const { data } = useAuth()
+
+const userA = ref(null)
+const isAdmin = computed(() => userA.value?.role === 'admin')
 
 const getAuthUser = async () => {
     try {
-        if (!data.value || !data.value.user) {
+        if (!data.value?.user) {
             throw new Error('User data is not available')
         }
+
         const response = await fetch(`/api/user/${data.value.user.id}`)
         if (!response.ok) {
             throw new Error('Failed to fetch user')
         }
+
         const userData = await response.json()
         userA.value = userData
-      } catch (error) {
-         console.error("Error fetching user:", error)
-      }
-   }
-   const userA = ref([])
-   const isAdmin = computed(() => userA.value.role === 'admin')
-   
-   console.log('getAuth', userA.value) 
 
-
+        if (!isAdmin.value) {
+            showToast('Access denied', 'error')
+            setTimeout(() => {
+                window.location.href = '/'
+            }, 1000)
+        }
+    } catch (error) {
+        console.error('Error fetching user:', error)
+    }
+}
 
 const { $moment } = useNuxtApp()
 const showToast = inject('showToast')
@@ -152,45 +157,30 @@ const editItem = (item) => {
 }
 
 const updateUser = async () => {
-    // Prepare the request body
     const requestBody = {
         name: editName.value,
         email: editEmail.value,
         role: editRole.value,
     }
 
-    // Only include the password if it's not empty
     if (editPass.value) {
         requestBody.password = editPass.value
     }
 
-    // Send the request
     const { data, error } = await useFetch(`/api/user/update/${editId.value}`, {
         method: "PATCH",
         body: requestBody,
     })
 
-    // Handle errors
     if (error.value) {
         showToast(error.value.statusMessage, 'error')
         return
     }
 
-    // Show success message and reload the page
     showToast(data.value.message)
     editItemDialog.value = false
     window.location.reload()
 }
-
-onMounted(() => { 
-   console.log('isAdmin', isAdmin.value)
-   //  if (!isAdmin.value) {
-   //      showToast('Access denied', 'error')
-   //      setTimeout(() => {
-   //          window.location.href = '/'
-   //      }, 1000)
-   //  }
-})
 
 const formatDate = (date) => {
     if (!date) return '-'
@@ -234,7 +224,6 @@ onMounted(() => {
 </script>
 <template>
    <v-container v-if="isAdmin">
-      <h1>{{ data }}</h1>
       <v-dialog v-model="addItem">
          <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
             <v-card-title class="d-flex align-center">
