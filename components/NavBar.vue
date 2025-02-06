@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useAuth } from '#imports'
 
 const genres = ref([])
 
@@ -18,24 +19,43 @@ const fetchGenres = async () => {
 
 onMounted(() => {
     fetchGenres()
-})  
+    fetchUser()
+})
+
+const { data, signOut } = useAuth()
+
+const fetchUser = async () => {
+    try {
+        if (!data.value || !data.value.user) {
+            throw new Error('User data is not available')
+        }
+        const response = await fetch(`/api/user/${data.value.user.id}`)
+        if (!response.ok) {
+            throw new Error('Failed to fetch user')
+        }
+        const userData = await response.json()
+        user.value = userData
+        console.log(user.value) 
+    } catch (error) {
+        console.error("Error fetching user:", error)
+    }
+}
 
 const drawer = ref(null)
 const adminBar = ref(null)
 const genre = ref(null)
 const dialogSignOut = ref(false)
-
-const {  data , signOut  } = useAuth()
+const user = ref([])
 
 </script>
 
 <template>
     <v-navigation-drawer theme="customLight" :elevation="12" v-model="drawer">
 
-        <v-list v-if="data?.user?.name" nav>
+        <v-list v-if="user" nav>
             <v-menu activator="parent">
               <v-list>
-                <v-list-item to="/profile">
+                <v-list-item :to="`/profile/${data.user.id}`">
                   <v-list-item-title>Edit Profile</v-list-item-title>
                 </v-list-item>
               </v-list>
@@ -43,11 +63,11 @@ const {  data , signOut  } = useAuth()
             <v-list-item>
                 <template v-slot:prepend>
                     <v-avatar color="secondary">
-                        {{ data.user.name.split(' ').length > 1 ? data.user.name.split(' ')[0].charAt(0) + data.user.name.split(' ').slice(-1)[0].charAt(0) : data.user.name.charAt(0) }}
+                        {{ user.name && user.name.split(' ').length > 1 ? user.name.split(' ')[0].charAt(0) + user.name.split(' ').slice(-1)[0].charAt(0) : user.name ? user.name.charAt(0) : '' }}
                     </v-avatar>
                 </template>
                 <v-list-item-title>
-                    <span class="text-wrap">{{ data.user.name }}</span>
+                    <span class="text-wrap">{{ user.name }}</span>
                 </v-list-item-title>
             </v-list-item>
         </v-list>
@@ -77,7 +97,7 @@ const {  data , signOut  } = useAuth()
 
         <v-divider></v-divider>
 
-        <v-list v-if="data?.user?.role === 'admin'" nav>
+        <v-list v-if="user?.role === 'admin'" nav>
             <v-list-item @click="adminBar = !adminBar" prepend-icon="mdi-shield-crown-outline" :append-icon="adminBar ? 'mdi-chevron-double-up' : 'mdi-chevron-double-down'">
                 <template v-slot:title>
                     <span class="font-weight-bold text-wrap">Admin Features</span>

@@ -277,6 +277,7 @@ onMounted(() => {
          :search="search"
          :items="movies"
          :loading="loading"
+         :items-per-page="10"
        >
          <!-- Row Numbering -->
          <template v-slot:item.index="{ index }">

@@ -7,22 +7,34 @@ export default defineEventHandler(async (event) => {
     try {
         const { id } = getRouterParams(event) // Get the user ID from the URL
         const body = await readBody(event) // Get the request body
+        const userExists = await prisma.users.findFirst({
+            where: {
+                email: body.email,
+            }
+        })
+
+        if (userExists && userExists.id !== id) {
+            setResponseStatus(event, 409)
+            return { error: 'Email is in used by another user' }
+        }  
 
         if (!id) {
             return { error: 'Invalid user ID' }
         }
 
-        // Prepare the data to update
         const updateData: any = {
             name: body.name,
             email: body.email,
-            role: body.role,
-            updated_at: new Date(), // Update the timestamp
+            updated_at: new Date(), 
         }
 
         // Only hash and update the password if it's provided
         if (body.password) {
             updateData.password = await hash(body.password, 12)
+        }
+
+        if (body.role) {
+            updateData.role = body.role
         }
 
         // Update the user

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useHead } from '#imports';
+import { refreshNuxtData } from '#imports';
 
 useHead({
 title: 'Manage User - Moreview',
@@ -10,9 +11,32 @@ title: 'Manage User - Moreview',
   ]
 });
 
-const { $moment } = useNuxtApp()
+
 const { data } = useAuth()
-const isAdmin = computed(() => data.value?.user?.role === 'admin')
+
+const getAuthUser = async () => {
+    try {
+        if (!data.value || !data.value.user) {
+            throw new Error('User data is not available')
+        }
+        const response = await fetch(`/api/user/${data.value.user.id}`)
+        if (!response.ok) {
+            throw new Error('Failed to fetch user')
+        }
+        const userData = await response.json()
+        userA.value = userData
+      } catch (error) {
+         console.error("Error fetching user:", error)
+      }
+   }
+   const userA = ref([])
+   const isAdmin = computed(() => userA.value.role === 'admin')
+   
+   console.log('getAuth', userA.value) 
+
+
+
+const { $moment } = useNuxtApp()
 const showToast = inject('showToast')
 const name = ref('')
 const email = ref('')
@@ -159,12 +183,13 @@ const updateUser = async () => {
 }
 
 onMounted(() => { 
-    if (!isAdmin.value) {
-        showToast('Access denied', 'error')
-        setTimeout(() => {
-            window.location.href = '/'
-        }, 1000)
-    }
+   console.log('isAdmin', isAdmin.value)
+   //  if (!isAdmin.value) {
+   //      showToast('Access denied', 'error')
+   //      setTimeout(() => {
+   //          window.location.href = '/'
+   //      }, 1000)
+   //  }
 })
 
 const formatDate = (date) => {
@@ -204,10 +229,12 @@ const fetchUsers = async () => {
 
 onMounted(() => {
     fetchUsers()
+    getAuthUser() 
 })  
 </script>
 <template>
    <v-container v-if="isAdmin">
+      <h1>{{ data }}</h1>
       <v-dialog v-model="addItem">
          <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
             <v-card-title class="d-flex align-center">

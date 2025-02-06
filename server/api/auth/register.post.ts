@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
 
     await prisma.users.create({
         data: {
-            email: body.email,
+            email: body.email.toLowerCase(),
             name: body.name,
             password: await hash(body.password, 12),
             role: "subs", 
