@@ -3,6 +3,22 @@ import { ref, onMounted } from 'vue'
 import { useAuth } from '#imports'
 
 const { data: authData } = useAuth()
+const { $moment } = useNuxtApp()
+
+const formatDate = (date) => {
+    if (!date) return '-'
+
+    const momentDate = $moment.utc(date).tz('Asia/Jakarta').locale('id')
+
+    if (momentDate.isSame($moment(), 'day')) {
+        return `Today at ${momentDate.format('HH:mm:ss')}`
+    } else if (momentDate.isSame($moment().subtract(1, 'day'), 'day')) {
+        return `Yesterday at ${momentDate.format('HH:mm:ss')}`
+    } else {
+        return momentDate.format('LLLL')
+    }
+}
+
 const authenticatedUser = computed(() => authData.value?.user)
 const showToast = inject('showToast')
 
@@ -70,7 +86,7 @@ const updateUser = async () => {
 
   showToast(data.value.message, "success");
   editItemDialog.value = false;
-  navigateTo("/");
+  window.location.reload();
 };
 
 // Check access on mounted
@@ -97,8 +113,8 @@ onMounted(async () => {
      <v-progress-circular v-if="loading" indeterminate color="primary"></v-progress-circular>
  
      <!-- User Profile -->
-     <v-card v-if="userProfile" width="100%" max-width="500px" class="d-flex mx-auto my-auto">
-       <v-card-title class="d-flex align-center">
+     <v-card v-if="userProfile" width="100%" max-width="500px" class="mx-auto my-auto" color="transparent">
+       <v-card-title class="d-flex align-center justify-center">
          <v-icon class="mr-2">mdi-account</v-icon>
          <h2 class="text-wrap">User Profile</h2>
        </v-card-title>
@@ -111,6 +127,14 @@ onMounted(async () => {
            <v-list-item>
              <v-list-item-title>Email</v-list-item-title>
              <v-list-item-subtitle>{{ userProfile.email }}</v-list-item-subtitle>
+           </v-list-item>
+           <v-list-item>
+             <v-list-item-title>Registered at</v-list-item-title>
+             <v-list-item-subtitle>{{ formatDate(userProfile.created_at) }}</v-list-item-subtitle>
+           </v-list-item>
+           <v-list-item>
+             <v-list-item-title>Last updated at</v-list-item-title>
+             <v-list-item-subtitle>{{ formatDate(userProfile.updated_at) }}</v-list-item-subtitle>
            </v-list-item>
          </v-list>
  

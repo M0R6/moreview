@@ -55,7 +55,7 @@ const user = ref([])
         <v-list v-if="user" nav>
             <v-menu activator="parent">
               <v-list>
-                <v-list-item :to="`/profile/${data.user.id}`">
+                <v-list-item prepend-icon="mdi-account-edit-outline" :to="`/profile/${data.user.id}`">
                   <v-list-item-title>Edit Profile</v-list-item-title>
                 </v-list-item>
               </v-list>
@@ -67,7 +67,8 @@ const user = ref([])
                     </v-avatar>
                 </template>
                 <v-list-item-title>
-                    <span class="text-wrap font-weight-bold">{{ user.name }}</span> <br>
+                    <span class="text-wrap font-weight-bold">{{ user.name + ' ' }}</span>
+                    <span class="text-wrap">{{ user.role === 'admin' ? '(Admin)' : null }}</span> <br>
                     <span class="text-wrap">{{ user.email }}</span>
                 </v-list-item-title>
             </v-list-item>

@@ -11,8 +11,37 @@ title: 'Manage Genre - Moreview',
 });
 
 const { $moment } = useNuxtApp()
+
 const { data } = useAuth()
-const isAdmin = computed(() => data.value?.user?.role === 'admin')
+
+const userA = ref(null)
+const isAdmin = computed(() => userA.value?.role === 'admin')
+
+const getAuthUser = async () => {
+    try {
+        if (!data.value?.user) {
+            throw new Error('User data is not available')
+        }
+
+        const response = await fetch(`/api/user/${data.value.user.id}`)
+        if (!response.ok) {
+            throw new Error('Failed to fetch user')
+        }
+
+        const userData = await response.json()
+        userA.value = userData
+
+        if (!isAdmin.value) {
+            showToast('Access denied', 'error')
+            setTimeout(() => {
+                window.location.href = '/'
+            }, 1000)
+        }
+    } catch (error) {
+        console.error('Error fetching user:', error)
+    }
+}
+
 const showToast = inject('showToast')
 const title = ref('')
 const form = ref(false)
@@ -99,15 +128,6 @@ const updateGenre = async () => {
     window.location.reload()
 }
 
-onMounted(() => { 
-    if (!isAdmin.value) {
-        showToast('Access denied', 'error')
-        setTimeout(() => {
-            window.location.href = '/'
-        }, 1000)
-    }
-})
-
 const formatDate = (date) => {
     if (!date) return '-'
 
@@ -145,6 +165,7 @@ const fetchGenres = async () => {
 
 onMounted(() => {
     fetchGenres()
+    getAuthUser()
 })  
 </script>
 <template>
