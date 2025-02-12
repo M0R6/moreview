@@ -1,4 +1,5 @@
 import vuetify from "vite-plugin-vuetify"
+import { defineNuxtConfig } from 'nuxt/config';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -20,7 +21,12 @@ export default defineNuxtConfig({
       },
       '@sidebase/nuxt-auth',
       '@nuxtjs/google-fonts',
+      'nuxt-file-storage',
+      '@nuxt/icon'
   ],
+  fileStorage: {
+    mount: process.env.FILE_STORAGE_MOUNT || '/assets/uploads',
+  },
 
   plugins: [
           '~/plugins/moment.js'

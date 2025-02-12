@@ -93,6 +93,31 @@ onMounted(() => {
   getAuthUser()
 })
 
+const handlePosterInput = async (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    poster.value = await convertFileToBase64(file);
+  }
+}
+
+// Handle Trailer Input
+const handleTrailerInput = async (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    trailer.value = await convertFileToBase64(file);
+  }
+}
+
+// Convert File to Base64
+const convertFileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+}
+
 // Add Movie
 const addMovie = async () => {
   const { data, error } = await useFetch('/api/movie/add', {
@@ -101,11 +126,11 @@ const addMovie = async () => {
       title: title.value,
       description: description.value,
       poster: poster.value,
+      trailer: trailer.value, 
       release_year: parseInt(releaseYear.value),
       duration: parseInt(duration.value),
       rating: parseInt(rating.value),
       creator: creator.value,
-      trailer: trailer.value,
       genreIds: genreIds.value,
     }
   })
@@ -215,6 +240,7 @@ const formatDate = (date) => {
   }
 }
 
+
 </script>
 
 <template>
@@ -234,6 +260,8 @@ const formatDate = (date) => {
              <v-text-field v-model="duration" label="Duration (minutes)" type="number" required variant="outlined"></v-text-field>
              <v-text-field v-model="rating" label="Rating" required variant="outlined"></v-text-field>
              <v-text-field v-model="creator" label="Creator" required variant="outlined"></v-text-field>
+             <v-file-input @input="handlePosterInput" label="Poster" accept="image/*" variant="outlined"></v-file-input>
+             <v-file-input @input="handleTrailerInput" label="Trailer (File)" accept="video/*" variant="outlined"></v-file-input>
              <v-text-field v-model="trailer" label="Trailer URL" variant="outlined"></v-text-field>
              <v-select
                v-model="genreIds"
@@ -287,6 +315,9 @@ const formatDate = (date) => {
            { title: 'Release Year', align: 'start', sortable: true, key: 'release_year' },
            { title: 'Duration', align: 'start', sortable: true, key: 'duration' },
            { title: 'Rating', align: 'start', sortable: true, key: 'rating' },
+           { title: 'Creator', align: 'start', sortable: true, key: 'creator' },
+           { title: 'Trailer', align: 'start', sortable: false, key: 'trailer' },
+           { title: 'Poster', align: 'start', sortable: false, key: 'poster' },
            { title: 'Created Date', align: 'start', sortable: true, key: 'created_at' },
            { title: 'Updated Date', align: 'start', sortable: true, key: 'updated_at' },
            { title: 'Deleted Date', align: 'start', sortable: true, key: 'deleted_at' },
@@ -301,6 +332,15 @@ const formatDate = (date) => {
          <template v-slot:item.index="{ index }">
            {{ index + 1 }}
          </template>
+
+         <template v-slot:item.trailer="{ item }">
+           <video width="320" height="240" controls :src="item.trailer">
+           </video>
+         </template>
+
+         <template v-slot:item.poster="{ item }">
+           <img :src="item.poster" width="100" height="100" />
+          </template>
  
          <!-- Date Formatting -->
          <template v-slot:item.created_at="{ item }">
@@ -343,6 +383,8 @@ const formatDate = (date) => {
              <v-text-field v-model="duration" label="Duration (minutes)" type="number" required variant="outlined"></v-text-field>
              <v-text-field v-model="rating" label="Rating" required variant="outlined"></v-text-field>
              <v-text-field v-model="creator" label="Creator" required variant="outlined"></v-text-field>
+             <v-file-input @input="handlePosterInput" v-model="poster" label="Poster" accept="image/*" variant="outlined"></v-file-input>
+             <v-file-input @input="handleTrailerInput" v-model="trailer" label="Trailer (File)" accept="video/*" variant="outlined"></v-file-input>
              <v-text-field v-model="trailer" label="Trailer URL" variant="outlined"></v-text-field>
              <v-select
                v-model="genreIds"

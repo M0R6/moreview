@@ -101,7 +101,7 @@ onMounted(async () => {
   if (authenticatedUser.value?.id !== id) {
     showToast('Access denied', 'error')
     setTimeout(() => {
-      window.location.href = '/'
+      navigateTo('/')
     }, 1000)
   }
 })
@@ -110,7 +110,7 @@ onMounted(async () => {
 <template>
    <v-container>
      <!-- Loading State -->
-     <v-progress-circular v-if="loading" indeterminate color="primary"></v-progress-circular>
+     <v-progress-circular class="mx-auto my-auto d-flex" v-if="loading" indeterminate color="primary"></v-progress-circular>
  
      <!-- User Profile -->
      <v-card v-if="userProfile" width="100%" max-width="500px" class="mx-auto my-auto" color="transparent">
@@ -173,7 +173,8 @@ onMounted(async () => {
                type="password"
                variant="outlined"
              ></v-text-field>
-             <v-btn type="submit" color="primary">Update Profile</v-btn>
+             <v-btn class="mr-2" type="submit" color="primary">Update Profile</v-btn>
+             <v-btn @click="editItemDialog = false">Cancel</v-btn>
            </v-form>
          </v-card-text>
        </v-card>

@@ -52,11 +52,11 @@ const user = ref([])
 <template>
     <v-navigation-drawer theme="customLight" :elevation="12" v-model="drawer">
 
-        <v-list v-if="user" nav>
+        <v-list v-if="data" nav>
             <v-menu activator="parent">
               <v-list>
                 <v-list-item prepend-icon="mdi-account-edit-outline" :to="`/profile/${data.user.id}`">
-                  <v-list-item-title>Edit Profile</v-list-item-title>
+                  <v-list-item-title>Edit Profile</v-list-item-title>   
                 </v-list-item>
               </v-list>
             </v-menu>
