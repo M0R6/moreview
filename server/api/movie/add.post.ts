@@ -49,12 +49,14 @@ export default defineEventHandler(async (event) => {
     data: {
       title: body.title,
       description: body.description,
-      poster: posterPath, // Use the saved poster path
-      release_year: parseInt(body.release_year), // Ensure it's an integer
-      duration: parseInt(body.duration), // Ensure it's an integer
-      rating: parseFloat(body.rating), // Ensure it's a float
+      release_year: parseInt(body.release_year),
+      duration: parseInt(body.duration),
+      rating: body.rating,
+      poster: posterPath,
+      trailer: trailerPath,
       creator: body.creator,
-      trailer: trailerPath, // Use the saved trailer path
+      cast: body.castings,
+      postedBy: body.postedBy,
       created_at: new Date(),
       updated_at: new Date(),
     },
@@ -72,8 +74,8 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // Fetch the film with its genres
-  const filmWithGenres = await prisma.film.findUnique({
+  // Fetch the film with its genres and castings
+  const filmWithRelations = await prisma.film.findUnique({
     where: { id: film.id },
     include: {
       genres_relations: {
@@ -84,5 +86,5 @@ export default defineEventHandler(async (event) => {
     },
   });
 
-  return filmWithGenres;
+  return filmWithRelations;
 });

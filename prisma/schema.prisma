@@ -19,6 +19,7 @@ model users {
   isActive          Boolean
 
   // Relations
+  films             Film[]
   comments          Comment[]
 }
 
@@ -29,16 +30,19 @@ model Film {
   description       String?
   release_year      Int
   duration          Int
-  rating            Int
+  rating            Rate
+  watchlist         Int?
   creator           String
+  cast              String
   trailer           String?
-  deleted_at        DateTime?
+  postedBy          String
+  archived_at       DateTime?
   created_at        DateTime
   updated_at        DateTime
 
   // Relations
+  createdBy         users     @relation(fields: [postedBy], references: [id])
   genres_relations  GenreRelation[]
-  castings          Casting[]
   comments          Comment[]
 }
 
@@ -61,19 +65,8 @@ model GenreRelation {
   updated_at        DateTime
 
   // Relations
-  film              Film      @relation(fields: [film_id], references: [id])
+  film              Film      @relation(fields: [film_id], references: [id], onDelete: Cascade)
   genre             Genre     @relation(fields: [genre_id], references: [id])
-}
-
-model Casting {
-  id                String    @id @default(uuid())
-  name              String
-  film_id           String
-  created_at        DateTime
-  updated_at        DateTime
-
-  // Relations
-  film              Film      @relation(fields: [film_id], references: [id])
 }
 
 model Comment {
@@ -100,4 +93,12 @@ enum CommentRating {
   bad
   good
   excellent
+}
+
+enum Rate {
+  G
+  PG
+  PG13
+  R
+  NC17
 }

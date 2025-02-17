@@ -1,57 +1,105 @@
-// server/api/films/[id].put.ts
+import { writeFile, mkdir } from 'fs/promises';
+import { existsSync } from 'fs';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+
 export default defineEventHandler(async (event) => {
-   const { params } = event.context;
-   if (!params || !params.id) {
-     throw new Error("Missing film ID");
-   }
-   const { id } = params;
-   const body = await readBody(event);
+  const { params } = event.context;
+  if (!params || !params.id) {
+    throw new Error("Missing film ID");
+  }
+  const { id } = params;
+  const body = await readBody(event);
+
+  const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+  if (!existsSync(uploadsDir)) {
+    await mkdir(uploadsDir, { recursive: true });
+  }
  
-   // Update the film
-   const updatedFilm = await prisma.film.update({
-     where: { id },
-     data: {
-       title: body.title,
-       description: body.description,
-       poster: body.poster,
-       release_year: body.release_year,
-       duration: body.duration,
-       rating: body.rating,
-       creator: body.creator,
-       trailer: body.trailer,
-       updated_at: new Date(),
+  let posterPath = null;
+  let trailerPath = null;
+ 
+  // Save poster file if provided
+  if (body.poster) {
+    const posterFileName = `${uuidv4()}.jpg`; // Adjust the extension as needed
+    const posterFilePath = path.join(uploadsDir, posterFileName);
+    const base64Data = body.poster.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = Buffer.from(base64Data, 'base64');
+    await writeFile(posterFilePath, buffer);
+    posterPath = `/uploads/${posterFileName}`;
+    console.log('Poster saved at:', posterPath);
+  }
+ 
+  // Save trailer file if provided
+  if (body.trailer) {
+    const trailerFileName = `${uuidv4()}.mp4`; // Adjust the extension as needed
+    const trailerFilePath = path.join(uploadsDir, trailerFileName);
+    const base64Data = body.trailer.replace(/^data:video\/\w+;base64,/, "");
+    const buffer = Buffer.from(base64Data, 'base64');
+    await writeFile(trailerFilePath, buffer);
+    trailerPath = `/uploads/${trailerFileName}`;
+    console.log('Trailer saved at:', trailerPath);
+  }
+ 
+  // Fetch the current film data
+  const currentFilm = await prisma.film.findUnique({
+    where: { id },
+  });
+
+  // Update the film
+  if (!currentFilm) {
+    throw new Error("Film not found");
+  }
+
+  const updatedFilm = await prisma.film.update({
+    where: { id },
+    data: {
+     title: body.title,
+     description: body.description,
+     poster: posterPath !== null ? posterPath : currentFilm.poster,
+     release_year: body.release_year,
+     duration: body.duration,
+     rating: body.rating,
+     creator: body.creator,
+     trailer: trailerPath !== null ? trailerPath : currentFilm.trailer,
+     updated_at: new Date(),
+    },
+  });
+ 
+  // Update genre relations
+  if (body.genreIds && body.genreIds.length > 0) {
+    // Delete existing genre relations
+    await prisma.genreRelation.deleteMany({
+     where: { film_id: id },
+    });
+ 
+    // Create new genre relations
+    await prisma.genreRelation.createMany({
+     data: body.genreIds.map((genreId: string) => ({
+      film_id: id,
+      genre_id: genreId,
+      created_at: new Date(),
+      updated_at: new Date(),
+     })),
+    });
+  } else {
+    // If no genreIds are provided, delete all genre relations for the film
+    await prisma.genreRelation.deleteMany({
+      where: { film_id: id },
+    });
+  }
+ 
+  // Fetch the updated film with its genre relations
+  const filmWithGenres = await prisma.film.findUnique({
+    where: { id },
+    include: {
+     genres_relations: {
+      include: {
+        genre: true, // Include genre details
+      },
      },
-   });
+    },
+  });
  
-   // Update genre relations
-   if (body.genreIds && body.genreIds.length > 0) {
-     // Delete existing genre relations
-     await prisma.genreRelation.deleteMany({
-       where: { film_id: id },
-     });
- 
-     // Create new genre relations
-     await prisma.genreRelation.createMany({
-       data: body.genreIds.map((genreId: string) => ({
-         film_id: id,
-         genre_id: genreId,
-         created_at: new Date(),
-         updated_at: new Date(),
-       })),
-     });
-   }
- 
-   // Fetch the updated film with its genre relations
-   const filmWithGenres = await prisma.film.findUnique({
-     where: { id },
-     include: {
-       genres_relations: {
-         include: {
-           genre: true, // Include genre details
-         },
-       },
-     },
-   });
- 
-   return filmWithGenres;
+  return filmWithGenres;
  });

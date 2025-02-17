@@ -42,10 +42,19 @@ const fetchUser = async () => {
 }
 
 const drawer = ref(null)
+const dialogSearch = ref(false)
 const adminBar = ref(null)
 const genre = ref(null)
 const dialogSignOut = ref(false)
 const user = ref([])
+const searchQuery = ref('')
+
+const search = () => {
+    const query = searchQuery.value.trim();
+    if (!query) return; // Prevents empty searches
+    window.location.href = `/${encodeURIComponent(query)}`;
+};
+
 
 </script>
 
@@ -68,7 +77,7 @@ const user = ref([])
                 </template>
                 <v-list-item-title>
                     <span class="text-wrap font-weight-bold">{{ user.name + ' ' }}</span>
-                    <span class="text-wrap">{{ user.role === 'admin' ? '(Admin)' : null }}</span> <br>
+                    <span class="text-wrap">{{ user.role === 'admin' ? '(Admin)' : user.role === 'author' ? '(Author)' : null }}</span> <br>
                     <span class="text-wrap">{{ user.email }}</span>
                 </v-list-item-title>
             </v-list-item>
@@ -110,6 +119,16 @@ const user = ref([])
                 <v-list-item prepend-icon="mdi-shape-plus" to="/admin/genre" title="Manage Genre"></v-list-item>
                 <v-list-item prepend-icon="mdi-account-box-multiple" to="/admin/user" title="Manage User"></v-list-item>
             </v-card>
+        </v-list>
+
+        <v-divider></v-divider>
+
+        <v-list v-if="user?.role === 'author'" nav>
+            <v-list-item prepend-icon="mdi-movie-cog" to="/author/movie">
+                <template v-slot:title>
+                    <span class="font-weight-bold text-wrap">Manage Your Movies</span>
+                </template>
+            </v-list-item>
         </v-list>
 
         <v-divider></v-divider>
@@ -159,19 +178,34 @@ const user = ref([])
             <img src="~/assets/img/logoku.png" width="50px">
             <h2 class="font-bold align-center d-flex ml-2">Moreview</h2>
         </div>
-        <v-hover>
-          <template v-slot:default="{ isHovering, props }">
-            <v-icon 
-              class="d-flex my-auto mr-3 cursor-pointer"
-              @click="drawer = !drawer" 
-              v-bind="props" 
-              :color="isHovering ? 'primary' : undefined" 
-              size="28" 
-              icon="mdi-magnify"
-              >
-            </v-icon>
-          </template>
-        </v-hover>
+            <v-menu open-on-hover class="d-flex justify-end" v-model="dialogSearch" max-width="600px">
+              <template v-slot:activator="{ props }">
+              <div class="d-flex">
+                <v-icon 
+                class="d-flex my-auto mr-3 cursor-pointer"
+                @click="dialogSearch = true" 
+                v-bind="props" 
+                size="28" 
+                icon="mdi-magnify">
+                </v-icon>
+              </div>
+              </template>
+              <v-card color="white" @click.stop width="600px">
+                <v-card-title>
+                  <span class="headline">Search</span>
+                </v-card-title>
+                <v-card-text>
+                  <v-text-field
+                    variant="outlined"
+                    v-model="searchQuery"
+                    label="Search..."
+                    append-inner-icon="mdi-magnify"
+                    hide-details
+                    @keyup.enter="search(searchQuery)"
+                  ></v-text-field>
+                </v-card-text>
+              </v-card>
+            </v-menu>
       </div>
     </v-app-bar>
 </template>

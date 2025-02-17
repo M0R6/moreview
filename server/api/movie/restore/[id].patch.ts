@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
         const updatedGenre = await prisma.film.update({
             where: { id },
             data: { 
-                deleted_at: null,
+                archived_at: null,
                 updated_at: new Date(),
              },
         })

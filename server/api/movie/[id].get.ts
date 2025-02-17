@@ -7,6 +7,7 @@ export default defineEventHandler(async (event) => {
    const film = await prisma.film.findUnique({
      where: { id },
      include: {
+       createdBy: true,
        genres_relations: {
          include: {
            genre: true,
