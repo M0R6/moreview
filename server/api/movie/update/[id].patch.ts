@@ -56,12 +56,15 @@ export default defineEventHandler(async (event) => {
     data: {
      title: body.title,
      description: body.description,
+     typeMov: body.typeMov,
      poster: posterPath !== null ? posterPath : currentFilm.poster,
-     release_year: body.release_year,
-     duration: body.duration,
+     release_year: parseInt(body.release_year),
+     duration: parseInt(body.duration) || null,
+     episode: parseInt(body.episode) || null,
      rating: body.rating,
      creator: body.creator,
      trailer: trailerPath !== null ? trailerPath : currentFilm.trailer,
+     trailerUrl: body.trailerUrl,
      updated_at: new Date(),
     },
   });

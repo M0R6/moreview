@@ -27,14 +27,17 @@ model Film {
   id                String    @id @default(uuid())
   title             String
   poster            String?
+  typeMov           movieType @default(movie)
   description       String?
   release_year      Int
-  duration          Int
+  duration          Int?
+  episode           Int?
   rating            Rate
   watchlist         Int?
   creator           String
   cast              String
   trailer           String?
+  trailerUrl        String?
   postedBy          String
   archived_at       DateTime?
   created_at        DateTime
@@ -90,9 +93,11 @@ enum Role {
 }
 
 enum CommentRating {
-  bad
-  good
-  excellent
+  one
+  two
+  three
+  four
+  five
 }
 
 enum Rate {
@@ -101,4 +106,15 @@ enum Rate {
   PG13
   R
   NC17
+  TVY
+  TVY7
+  TVG
+  TVPG
+  TV14
+  TVMA
+}
+
+enum movieType {
+  movie
+  series
 }

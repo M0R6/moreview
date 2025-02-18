@@ -16,7 +16,7 @@ title: 'Landing - Moreview',
 definePageMeta({
   layout: "anon",
   auth: {
-    unauthenticatedOnly: true,
+    unauthenticatedOnly: false,
     navigateAuthenticatedTo: '/',
   }
 })

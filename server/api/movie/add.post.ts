@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
   // Validate required fields
-  if (!body.title || !body.description || !body.release_year || !body.duration || !body.rating || !body.creator) {
+  if (!body.title || !body.description || !body.release_year || !body.rating || !body.creator) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Missing required fields (title, description, release_year, duration, rating, creator).',
@@ -48,12 +48,15 @@ export default defineEventHandler(async (event) => {
   const film = await prisma.film.create({
     data: {
       title: body.title,
+      typeMov: body.movieType,
       description: body.description,
       release_year: parseInt(body.release_year),
-      duration: parseInt(body.duration),
+      duration: parseInt(body.duration) || null,
+      episode: parseInt(body.episode) || null,
       rating: body.rating,
       poster: posterPath,
       trailer: trailerPath,
+      trailerUrl: body.trailerUrl,
       creator: body.creator,
       cast: body.castings,
       postedBy: body.postedBy,

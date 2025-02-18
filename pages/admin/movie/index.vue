@@ -43,14 +43,17 @@ const showToast = inject("showToast");
 
 // Movie Form
 const title = ref("");
+const movieType = ref("");
 const description = ref("");
 const poster = ref("");
 const releaseYear = ref("");
 const duration = ref("");
+const episode = ref("");
 const rating = ref("");
 const creator = ref("");
 const castings = ref([]);
 const trailer = ref("");
+const trailerUrl = ref("");
 const genreIds = ref([]);
 const form = ref(false);
 const addMovieDialog = ref(false);
@@ -152,11 +155,14 @@ const addMovie = async () => {
       method: "POST",
       body: {
         title: title.value,
+        typeMov: movieType.value,
         description: description.value,
         poster: posterBase64,
         trailer: trailerBase64,
+        trailerUrl: trailer.value,
         release_year: parseInt(releaseYear.value),
         duration: parseInt(duration.value),
+        episode: parseInt(episode.value),
         rating: rating.value,
         castings: castings.value,
         postedBy: userA.value.id,
@@ -246,14 +252,17 @@ const editId = ref(null);
 const editMovie = (movie) => {
   editId.value = movie.id;
   title.value = movie.title;
+  movieType.value = movie.typeMov;
   description.value = movie.description;
   poster.value = movie.poster;
   releaseYear.value = movie.release_year;
   duration.value = movie.duration;
+  episode.value = movie.episode;
   rating.value = movie.rating;
   creator.value = movie.creator;
   castings.value = movie.cast;
   trailer.value = movie.trailer;
+  trailerUrl.value = movie.trailerUrl;
   genreIds.value = movie.genres_relations.map((relation) => relation.genre_id);
   editMovieDialog.value = true;
 };
@@ -274,14 +283,17 @@ const updateMovie = async () => {
         method: "PATCH",
         body: {
           title: title.value,
+          typeMov: movieType.value,
           description: description.value,
           poster: posterBase64,
           release_year: releaseYear.value,
           duration: duration.value,
+          episode: episode.value,
           rating: rating.value,
           creator: creator.value,
           castings: castings.value,
           trailer: trailerBase64,
+          trailerUrl: trailerUrl.value,
           genreIds: genreIds.value,
         },
       }
@@ -321,14 +333,17 @@ const formatDate = (date) => {
 const formNull = () => {
   editMovieDialog.value = false;
   title.value = "";
+  movieType.value = "";
   description.value = "";
   poster.value = "";
   releaseYear.value = "";
   duration.value = "";
+  episode.value = "";
   rating.value = "";
   creator.value = "";
   castings.value = [];
   trailer.value = "";
+  trailerUrl.value = "";
   genreIds.value = [];
   form.value = false;
   addMovieDialog.value = false;
@@ -346,6 +361,9 @@ const viewMovie = (movie) => {
   viewMovieDialog.value = true;
   viewMovieData.value = movie;
 };
+
+const movieRate = (['G', 'PG', 'PG13', 'R', 'NC17']);
+const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
 </script>
 
 <template>
@@ -375,11 +393,18 @@ const viewMovie = (movie) => {
 
                 <v-list-item>
                   <v-list-item-title class="font-weight-bold"
-                    >Description:</v-list-item-title
+                    >Type:</v-list-item-title
                   >
                   <v-list-item-subtitle>{{
-                    viewMovieData?.description || "-"
+                    viewMovieData?.typeMov === 'movie' ? 'Movie' : 'Series' || "-"
                   }}</v-list-item-subtitle>
+                </v-list-item>
+
+                <v-list-item>
+                  <v-list-item-title class="font-weight-bold"
+                    >Description:</v-list-item-title
+                  >
+                  <span>{{viewMovieData?.description || "-"}}</span>
                 </v-list-item>
 
                 <v-list-item>
@@ -491,18 +516,18 @@ const viewMovie = (movie) => {
           </v-row>
 
           <!-- Trailer Section -->
-          <v-row v-if="viewMovieData?.trailer">
+          <v-row v-if="viewMovieData?.trailer || viewMovieData?.trailerUrl">
             <v-col cols="12">
               <h3 class="text-h6 mb-3">Trailer</h3>
               <video
-                v-if="viewMovieData?.trailer.startsWith('/uploads')"
+                v-if="viewMovieData?.trailer"
                 :src="viewMovieData?.trailer"
                 controls
                 class="w-100 rounded-lg"
               ></video>
               <iframe
                 v-else
-                :src="viewMovieData?.trailer"
+                :src="viewMovieData?.trailerUrl"
                 class="w-100 rounded-lg"
                 height="400"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -536,6 +561,13 @@ const viewMovie = (movie) => {
               required
               variant="outlined"
             ></v-text-field>
+            <v-select
+              v-model="movieType"
+              :items="['movie', 'series']"
+              label="Movie Type"
+              required
+              variant="outlined"
+            ></v-select>
             <v-textarea
               v-model="description"
               label="Description"
@@ -549,16 +581,23 @@ const viewMovie = (movie) => {
               variant="outlined"
             ></v-text-field>
             <v-text-field
+              v-if="movieType === 'movie'"
               v-model="duration"
               type="number"
               label="Duration (minutes)"
-              editF
               required
+              variant="outlined"
+            ></v-text-field>
+            <v-text-field
+              v-if="movieType === 'series'"
+              v-model="episode"
+              type="number"
+              label="Episode"
               variant="outlined"
             ></v-text-field>
             <v-select
               v-model="rating"
-              :items="['G', 'PG', 'PG13', 'R', 'NC17']"
+              :items="movieType === 'movie' ? movieRate : seriesRate"
               label="Rating"
               required
               variant="outlined"
@@ -794,6 +833,13 @@ const viewMovie = (movie) => {
               required
               variant="outlined"
             ></v-text-field>
+            <v-select
+              v-model="movieType"
+              :items="['movie', 'series']"
+              label="Movie Type"
+              required
+              variant="outlined"
+            ></v-select>
             <v-textarea
               v-model="description"
               label="Description"
@@ -807,10 +853,18 @@ const viewMovie = (movie) => {
               variant="outlined"
             ></v-text-field>
             <v-text-field
+              v-if="movieType === 'movie'"
               v-model="duration"
               label="Duration (minutes)"
               type="number"
               required
+              variant="outlined"
+            ></v-text-field>
+            <v-text-field
+              v-if="movieType === 'series'"
+              v-model="episode"
+              type="number"
+              label="Episode"
               variant="outlined"
             ></v-text-field>
             <v-select
@@ -846,7 +900,7 @@ const viewMovie = (movie) => {
               variant="outlined"
             ></v-file-input>
             <v-text-field
-              v-model="trailer"
+              v-model="trailerUrl"
               label="Trailer URL"
               variant="outlined"
             ></v-text-field>

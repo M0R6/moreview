@@ -47,7 +47,9 @@ const description = ref("");
 const poster = ref("");
 const releaseYear = ref("");
 const duration = ref("");
+const episode = ref("");
 const rating = ref("");
+const movieType = ref("")
 const creator = ref("");
 const castings = ref([]);
 const trailer = ref("");
@@ -156,9 +158,11 @@ const addMovie = async () => {
         title: title.value,
         description: description.value,
         poster: posterBase64,
+        typeMov: movieType.value,
         trailer: trailerBase64,
         release_year: parseInt(releaseYear.value),
         duration: parseInt(duration.value),
+        episode: episode.value,
         rating: rating.value,
         castings: castings.value,
         postedBy: userA.value.id,
@@ -250,8 +254,10 @@ const editMovie = (movie) => {
   title.value = movie.title;
   description.value = movie.description;
   poster.value = movie.poster;
+  movieType.value = movie.type;
   releaseYear.value = movie.release_year;
   duration.value = movie.duration;
+  episode.value = movie.episode;
   rating.value = movie.rating;
   creator.value = movie.creator;
   castings.value = movie.cast;
@@ -278,8 +284,10 @@ const updateMovie = async () => {
           title: title.value,
           description: description.value,
           poster: posterBase64,
+          typeMov: movieType.value,
           release_year: releaseYear.value,
           duration: duration.value,
+          episode: episode.value,
           rating: rating.value,
           creator: creator.value,
           castings: castings.value,
@@ -325,8 +333,10 @@ const formNull = () => {
   title.value = "";
   description.value = "";
   poster.value = "";
+  movieType.value = "";
   releaseYear.value = "";
   duration.value = "";
+  episode.value = "";
   rating.value = "";
   creator.value = "";
   castings.value = [];
@@ -339,6 +349,9 @@ const formNull = () => {
   selectedPoster.value = null;
   selectedTrailer.value = null;
 };
+
+const movieRate = (['G', 'PG', 'PG13', 'R', 'NC17']);
+const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
 
 // View Movie Data
 const viewMovieDialog = ref(false);
@@ -377,11 +390,22 @@ const viewMovie = (movie) => {
 
                 <v-list-item>
                   <v-list-item-title class="font-weight-bold"
-                    >Description:</v-list-item-title
+                    >Type:</v-list-item-title
                   >
                   <v-list-item-subtitle>{{
-                    viewMovieData?.description || "-"
+                    viewMovieData?.typeMov === 'movie' ? 'Movie' : 'Series'
                   }}</v-list-item-subtitle>
+                </v-list-item>
+
+                <v-list-item>
+                  <v-list-item-title class="font-weight-bold"
+                  >Description:</v-list-item-title
+                  >
+                  <span class="text-wrap">
+                    {{
+                    viewMovieData?.description || "-"
+                    }}
+                  </span>
                 </v-list-item>
 
                 <v-list-item>
@@ -538,6 +562,13 @@ const viewMovie = (movie) => {
               required
               variant="outlined"
             ></v-text-field>
+            <v-select
+              v-model="movieType"
+              :items="['movie', 'series']"
+              label="Movie Type"
+              required
+              variant="outlined"
+            ></v-select>
             <v-textarea
               v-model="description"
               label="Description"
@@ -558,9 +589,15 @@ const viewMovie = (movie) => {
               required
               variant="outlined"
             ></v-text-field>
+            <v-text-field
+              v-model="episode"
+              type="number"
+              label="Episode"
+              variant="outlined"
+            ></v-text-field>
             <v-select
               v-model="rating"
-              :items="['G', 'PG', 'PG13', 'R', 'NC17']"
+              :items="movieType === 'movie' ? movieRate : seriesRate"
               label="Rating"
               required
               variant="outlined"
@@ -796,6 +833,13 @@ const viewMovie = (movie) => {
               required
               variant="outlined"
             ></v-text-field>
+            <v-select
+              v-model="movieType"
+              :items="['movie', 'series']"
+              label="Movie Type"
+              required
+              variant="outlined"
+            ></v-select>
             <v-textarea
               v-model="description"
               label="Description"
@@ -815,9 +859,15 @@ const viewMovie = (movie) => {
               required
               variant="outlined"
             ></v-text-field>
+            <v-text-field
+              v-model="episode"
+              type="number"
+              label="Episode"
+              variant="outlined"
+            ></v-text-field>
             <v-select
               v-model="rating"
-              :items="['G', 'PG', 'PG13', 'R', 'NC17']"
+              :items="['G', 'PG', 'PG13', 'R', 'NC17', 'TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']"
               label="Rating"
               required
               variant="outlined"

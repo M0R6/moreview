@@ -85,7 +85,7 @@ const login = async (email, password) => {
               <v-btn color="transparent" variant="text" block class="mt-2 text-none" to="/auth/register" nuxt>
                 <span class="text-black">Don't have an account? <span class="font-weight-bold">Register</span></span>
               </v-btn>
-              <v-btn color="transparent" append-icon="mdi-chevron-right" variant="text" block class="mt-2 text-none" to="/landing" nuxt>
+              <v-btn color="transparent" append-icon="mdi-chevron-right" variant="text" block class="mt-2 text-none" to="/" nuxt>
                 <span class="text-black">or continue as <span class="font-weight-bold">Anonymous</span></span>
               </v-btn>
             </v-card>
