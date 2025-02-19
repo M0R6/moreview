@@ -3,6 +3,7 @@ import { defineNuxtConfig } from 'nuxt/config';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  devtools: { enabled: true },
   ssr: true,
   css: ["vuetify/styles"],
   sourcemap: { server: false, client: false },
@@ -37,7 +38,9 @@ export default defineNuxtConfig({
       }
   },
 
-  build:{ transpile: ["vuetify"] },
+  build: {
+      transpile: ["vuetify", '@vuepic/vue-datepicker']
+  },
   vite: { ssr: { noExternal: ["vuetify"] } },
 
   // @ts-ignore

@@ -143,6 +143,7 @@ const convertFileToBase64 = (file) => {
 // Add Movie
 const addMovie = async () => {
   try {
+
     const posterBase64 = selectedPoster.value
       ? await convertFileToBase64(selectedPoster.value)
       : null;
@@ -305,7 +306,7 @@ const updateMovie = async () => {
     }
     showToast("Movie updated successfully", "success");
     editMovieDialog.value = false;
-    window.location.reload();
+    fetchMovies();
   } catch (error) {
     console.error("Error updating movie:", error);
     showToast("Failed to update movie. Please try again.", "error");
@@ -409,10 +410,10 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
 
                 <v-list-item>
                   <v-list-item-title class="font-weight-bold"
-                    >Release Year:</v-list-item-title
+                    >Release Date:</v-list-item-title
                   >
                   <v-list-item-subtitle>{{
-                    viewMovieData?.release_year || "-"
+                    viewMovieData?.release_year ? formatDate(viewMovieData?.release_year) : "-"
                   }}</v-list-item-subtitle>
                 </v-list-item>
 
@@ -544,7 +545,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
       </v-card>
     </v-dialog>
     <v-dialog v-model="addMovieDialog">
-      <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+      <v-card color="white" width="100%" max-width="500px" class="d-flex mx-auto my-auto">
         <v-card-title class="d-flex align-center">
           <Icon
             class="mr-2 my-auto"
@@ -575,8 +576,8 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
             ></v-textarea>
             <v-text-field
               v-model="releaseYear"
+              label="Release Date"
               type="number"
-              label="Release Year"
               required
               variant="outlined"
             ></v-text-field>
@@ -700,7 +701,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
             key: 'genre_relation',
           },
           {
-            title: 'Release Year',
+            title: 'Release Date',
             align: 'start',
             sortable: true,
             key: 'release_year',
@@ -847,7 +848,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
             ></v-textarea>
             <v-text-field
               v-model="releaseYear"
-              label="Release Year"
+              label="Release Date"
               type="number"
               required
               variant="outlined"

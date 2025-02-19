@@ -9,12 +9,8 @@ export default defineEventHandler(async (event) => {
             return { error: 'Invalid genre ID' }
         }
 
-        const updatedGenre = await prisma.genre.update({
-            where: { id },
-            data: { 
-                deleted_at: new Date(),
-                updated_at: new Date(),
-             },
+        const updatedGenre = await prisma.genre.delete({
+            where: { id }
         })
 
         return { message: 'Genre updated successfully', updatedGenre }

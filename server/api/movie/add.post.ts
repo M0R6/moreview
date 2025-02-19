@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
   // Validate required fields
-  if (!body.title || !body.description || !body.release_year || !body.rating || !body.creator) {
+  if (!body.title || !body.description || !body.rating || !body.creator) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Missing required fields (title, description, release_year, duration, rating, creator).',

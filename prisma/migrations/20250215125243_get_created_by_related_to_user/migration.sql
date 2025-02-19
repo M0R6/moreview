@@ -1,2 +1,0 @@
--- AddForeignKey
-ALTER TABLE "Film" ADD CONSTRAINT "Film_postedBy_fkey" FOREIGN KEY ("postedBy") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

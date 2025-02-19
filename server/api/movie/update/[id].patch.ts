@@ -1,4 +1,4 @@
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
@@ -18,9 +18,23 @@ export default defineEventHandler(async (event) => {
  
   let posterPath = null;
   let trailerPath = null;
+
+  // Fetch the current film data
+  const currentFilm = await prisma.film.findUnique({
+    where: { id },
+  });
+
+  // Update the film
+  if (!currentFilm) {
+    throw new Error("Film not found");
+  }
  
-  // Save poster file if provided
+  // Save poster file if provided and delete the old one
   if (body.poster) {
+    if (currentFilm.poster) {
+      const oldPosterPath = path.join(uploadsDir, path.basename(currentFilm.poster));
+      await unlink(oldPosterPath).catch(() => console.warn("Failed to delete old poster"));
+    }
     const posterFileName = `${uuidv4()}.jpg`; // Adjust the extension as needed
     const posterFilePath = path.join(uploadsDir, posterFileName);
     const base64Data = body.poster.replace(/^data:image\/\w+;base64,/, "");
@@ -30,8 +44,12 @@ export default defineEventHandler(async (event) => {
     console.log('Poster saved at:', posterPath);
   }
  
-  // Save trailer file if provided
+  // Save trailer file if provided and delete the old one
   if (body.trailer) {
+    if (currentFilm.trailer) {
+      const oldTrailerPath = path.join(uploadsDir, path.basename(currentFilm.trailer));
+      await unlink(oldTrailerPath).catch(() => console.warn("Failed to delete old trailer"));
+    }
     const trailerFileName = `${uuidv4()}.mp4`; // Adjust the extension as needed
     const trailerFilePath = path.join(uploadsDir, trailerFileName);
     const base64Data = body.trailer.replace(/^data:video\/\w+;base64,/, "");
@@ -39,16 +57,6 @@ export default defineEventHandler(async (event) => {
     await writeFile(trailerFilePath, buffer);
     trailerPath = `/uploads/${trailerFileName}`;
     console.log('Trailer saved at:', trailerPath);
-  }
- 
-  // Fetch the current film data
-  const currentFilm = await prisma.film.findUnique({
-    where: { id },
-  });
-
-  // Update the film
-  if (!currentFilm) {
-    throw new Error("Film not found");
   }
 
   const updatedFilm = await prisma.film.update({
