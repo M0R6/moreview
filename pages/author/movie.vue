@@ -32,7 +32,7 @@ const getAuthUser = async () => {
     if (!isAuthor.value) {
       showToast("Access denied", "error");
       setTimeout(() => {
-        window.location.href = "/";
+        navigateTo("/")
       }, 1000);
     }
   } catch (error) {
@@ -177,7 +177,7 @@ const addMovie = async () => {
     }
 
     showToast("Movie added successfully", "success");
-    window.location.reload();
+    fetchMovies();
   } catch (error) {
     console.error("Error adding movie:", error);
     showToast("Failed to add movie. Please try again.", "error");
@@ -199,7 +199,7 @@ const deleteMovie = async (id) => {
     }
 
     showToast("Movie deleted successfully", "success");
-    window.location.reload();
+    fetchMovies();
   } catch (error) {
     console.error("Error deleting movie:", error);
     showToast("Error deleting movie", "error");
@@ -218,7 +218,7 @@ const archiveMovie = async (id) => {
     }
 
     showToast("Movie archived successfully", "success");
-    window.location.reload();
+    fetchMovies();
   } catch (error) {
     console.error("Error archiving movie:", error);
     showToast("Error archiving movie", "error");
@@ -237,7 +237,7 @@ const restoreMovie = async (id) => {
     }
 
     showToast("Movie restored successfully", "success");
-    window.location.reload();
+    fetchMovies();
   } catch (error) {
     console.error("Error restoring movie:", error);
     showToast("Error restoring movie", "error");
@@ -303,7 +303,7 @@ const updateMovie = async () => {
     }
     showToast("Movie updated successfully", "success");
     editMovieDialog.value = false;
-    window.location.reload();
+    fetchMovies();
   } catch (error) {
     console.error("Error updating movie:", error);
     showToast("Failed to update movie. Please try again.", "error");
@@ -657,7 +657,7 @@ const viewMovie = (movie) => {
     </v-dialog>
 
     <!-- Movie Table -->
-    <v-card color="white" elevation="4">
+    <v-card elevation="4">
       <v-card-title class="d-flex justify-space-between flex-wrap">
         <div class="d-flex flex-wrap">
           <div class="d-flex align-center" width="100%">

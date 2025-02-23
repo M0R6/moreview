@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useHead } from '#imports';
-import { refreshNuxtData } from '#imports';
 
 useHead({
 title: 'Manage User - Moreview',
@@ -33,7 +32,7 @@ const getAuthUser = async () => {
         if (!isAdmin.value) {
             showToast('Access denied', 'error')
             setTimeout(() => {
-                window.location.href = '/'
+                navigateTo('/')
             }, 1000)
         }
     } catch (error) {
@@ -66,7 +65,8 @@ const addUser = async () => {
         return
     }
     showToast(data.value.message)
-    window.location.reload()
+    fetchUsers()
+    addDialog.value = false
 }
 
 const deleteUser = async (id) => {
@@ -80,7 +80,8 @@ const deleteUser = async (id) => {
       }
 
       showToast('Genre updated successfully', 'success')
-      window.location.reload()
+      fetchUsers()
+      areYouSure.value = false
    } catch (error) {
       console.error('Error updating genre:', error)
       showToast('Error updating genre', 'error')
@@ -98,7 +99,7 @@ const banUser = async (id) => {
       }
 
       showToast('User banned successfully', 'success')
-      window.location.reload()
+      fetchUsers()
    } catch (error) {
       console.error('Error to unban user:', error)
       showToast('Error to unban user:', 'error')
@@ -116,7 +117,7 @@ const unbanUser = async (id) => {
       }
 
       showToast('User unbanned successfully', 'success')
-      window.location.reload()
+      fetchUsers()
    } catch (error) {
       console.error('Error to unban user', error)
       showToast('Error to unban user', 'error')
@@ -129,10 +130,10 @@ const restoreItem = async (id) => {
          method: 'PATCH',
       })
       if (!response.ok) {
-         throw new Error('Failed to restore genre')
+         throw new Error('Failed to restore user')
       }
-      showToast('Genre restored successfully', 'success')
-      window.location.reload()
+      showToast('User restored successfully', 'success')
+      fetchUsers()
    } catch (error) {
       console.error('Error restoring genre:', error)
       showToast('Error restoring genre', 'error')
@@ -179,7 +180,7 @@ const updateUser = async () => {
 
     showToast(data.value.message)
     editItemDialog.value = false
-    window.location.reload()
+    fetchUsers()
 }
 
 const formatDate = (date) => {
@@ -204,7 +205,7 @@ const areYouSure = ref(false)
 
 const fetchUsers = async () => {
     try {
-        const response = await fetch('/api/user/manageUser')
+        const response = await fetch('/api/user/manageUsers')
         loading.value = false
         if (!response.ok) {
             throw new Error('Failed to fetch genres')
@@ -281,7 +282,7 @@ onMounted(() => {
             </v-card-text>
          </v-card>
       </v-dialog>
-      <v-card color="white" elevation="4">
+      <v-card elevation="4">
          <v-card-title class="d-flex justify-space-between flex-wrap">
             <div class="d-flex flex-wrap">
                <div class="d-flex align-center" width="100%">   

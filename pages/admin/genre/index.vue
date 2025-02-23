@@ -34,7 +34,7 @@ const getAuthUser = async () => {
     if (!isAdmin.value) {
       showToast("Access denied", "error");
       setTimeout(() => {
-        window.location.href = "/";
+        navigateTo("/")
       }, 1000);
     }
   } catch (error) {
@@ -190,7 +190,7 @@ onMounted(() => {
         </v-card-text>
       </v-card>
     </v-dialog>
-    <v-card color="white" elevation="4">
+    <v-card elevation="4">
       <v-card-title class="d-flex justify-space-between flex-wrap">
         <div class="d-flex flex-wrap">
           <div class="d-flex align-center" width="100%">

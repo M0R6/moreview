@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAuth } from '#imports'
+import { inject } from 'vue'
+
+const theme = inject('theme')
 
 const genres = ref([])
 
@@ -52,14 +55,12 @@ const searchQuery = ref('')
 const search = () => {
     const query = searchQuery.value.trim();
     if (!query) return; // Prevents empty searches
-    window.location.href = `/${encodeURIComponent(query)}`;
+    navigateTo(`/search/${encodeURIComponent(query)}`)
 };
-
-
 </script>
 
 <template>
-    <v-navigation-drawer theme="customLight" :elevation="12" v-model="drawer">
+    <v-navigation-drawer :elevation="12" v-model="drawer">
 
         <v-list v-if="data" nav>
             <v-menu activator="parent">
@@ -99,9 +100,39 @@ const search = () => {
         <v-divider></v-divider>
 
         <v-list nav>
-            <v-list-item prepend-icon="mdi-home" :to="data?.user ? '/' : '#'" nuxt>
+            <v-list-item prepend-icon="mdi-home" to="/" nuxt>
                 <template v-slot:title>
                     <span class="font-weight-bold">Home</span>
+                </template>
+            </v-list-item>
+        </v-list>
+
+        <v-divider></v-divider>
+
+        <!-- <v-list nav>
+            <v-list-item prepend-icon="mdi-home" @click="toggleTheme" nuxt>
+                <template v-slot:title>
+                    <span class="font-weight-bold">Theme</span>
+                </template>
+            </v-list-item>
+        </v-list>
+
+        <v-divider></v-divider> -->
+
+        <v-list nav>
+            <v-list-item prepend-icon="mdi-movie-open-play-outline" to="/movie" nuxt>
+                <template v-slot:title>
+                    <span class="font-weight-bold">Movies</span>
+                </template>
+            </v-list-item>
+        </v-list>
+
+        <v-divider></v-divider>
+
+        <v-list nav>
+            <v-list-item prepend-icon="mdi-television-classic" to="/series" nuxt>
+                <template v-slot:title>
+                    <span class="font-weight-bold">Series</span>
                 </template>
             </v-list-item>
         </v-list>
@@ -121,7 +152,7 @@ const search = () => {
             </v-card>
         </v-list>
 
-        <v-divider></v-divider>
+        <v-divider v-if="user?.role === 'admin'"></v-divider>
 
         <v-list v-if="user?.role === 'author'" nav>
             <v-list-item prepend-icon="mdi-movie-cog" to="/author/movie">
@@ -131,7 +162,7 @@ const search = () => {
             </v-list-item>
         </v-list>
 
-        <v-divider></v-divider>
+        <v-divider v-if="user?.role === 'author'"></v-divider>
 
         <v-list nav class="overflow-y-auto" max-height="450px">
             <v-list-item prepend-icon="mdi-shape-plus" :append-icon="genre ? 'mdi-chevron-double-up' : 'mdi-chevron-double-down'" @click="genre = !genre">
@@ -140,7 +171,7 @@ const search = () => {
                 </template>
             </v-list-item>
             <v-card elevation="0" v-if="genre" class="align-center">
-                <v-list-item 
+                <v-list-item
                     v-for="(genre, index) in genres" 
                     :key="index"
                     :to="`/genre/${genre.id}`">
@@ -153,25 +184,24 @@ const search = () => {
 
         <v-divider></v-divider>
 
-        <v-card color="error" class="ma-3" elevation="0">
+        <v-card class="" elevation="0">
             <v-dialog v-model="dialogSignOut">
                 <v-card class="d-flex mx-auto" max-width="100%" width="400px">
                     <v-card-title>Sign Out</v-card-title>
                     <v-card-text>Are you sure you want to sign out?</v-card-text>
                     <v-card-actions>
-                        <v-btn @click="dialogSignOut = false">Cancel</v-btn>
-                        <v-btn @click="signOut({ callbackUrl: '/auth/login' })">Sign Out</v-btn>
+                        <v-btn class="text-none" @click="dialogSignOut = false">Cancel</v-btn>
+                        <v-btn class="text-none" color="error" @click="signOut({ callbackUrl: '/' })">Sign Out</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-dialog>
             <v-list v-if="data?.user?.name" nav>
-                <v-list-item prepend-icon="mdi-logout-variant" @click="dialogSignOut = true" title="Sign out"></v-list-item>
+                <v-list-item class="text-error" prepend-icon="mdi-logout-variant" @click="dialogSignOut = true" title="Sign out"></v-list-item>
             </v-list>
         </v-card>
     </v-navigation-drawer>
 
-
-    <v-app-bar elevation="0" color="white">
+    <v-app-bar :color="theme.global.name.value === 'customLight' ? 'white' : null" elevation="0">
       <div class="d-flex w-100 justify-space-between align-center">
         <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
         <div class="d-flex">
@@ -190,7 +220,7 @@ const search = () => {
                 </v-icon>
               </div>
               </template>
-              <v-card color="white" @click.stop width="600px">
+              <v-card @click.stop width="600px">
                 <v-card-title>
                   <span class="headline">Search</span>
                 </v-card-title>

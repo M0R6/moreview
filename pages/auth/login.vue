@@ -1,5 +1,6 @@
 <script setup>
 import { useHead } from '#imports';
+import { inject, ref } from 'vue';
 
 useHead({
 title: 'Login - Moreview',
@@ -11,6 +12,7 @@ title: 'Login - Moreview',
 
 const { signIn } = useAuth()
 const showToast = inject('showToast')
+const toggleTheme = inject('toggleTheme')
 
 definePageMeta({
   layout: "auth",
@@ -46,7 +48,7 @@ const login = async (email, password) => {
 </script>
 
 <template>
-  <div class="d-flex align-center justify-center" style="height: 100vh; background-color: #f5f5f5;">
+  <div class="d-flex align-center justify-center" style="height: 100vh;">
     <v-container>
       <v-row>
 
@@ -82,11 +84,11 @@ const login = async (email, password) => {
                   Sign In
                 </v-btn>
               </v-form>
-              <v-btn color="transparent" variant="text" block class="mt-2 text-none" to="/auth/register" nuxt>
-                <span class="text-black">Don't have an account? <span class="font-weight-bold">Register</span></span>
+              <v-btn variant="text" block class="mt-2 text-none" to="/auth/register" nuxt>
+                <span>Don't have an account? <span class="font-weight-bold">Register</span></span>
               </v-btn>
-              <v-btn color="transparent" append-icon="mdi-chevron-right" variant="text" block class="mt-2 text-none" to="/" nuxt>
-                <span class="text-black">or continue as <span class="font-weight-bold">Anonymous</span></span>
+              <v-btn append-icon="mdi-chevron-right" variant="text" block class="mt-2 text-none" to="/" nuxt>
+                <span>or continue as <span class="font-weight-bold">Anonymous</span></span>
               </v-btn>
             </v-card>
           </v-hover>

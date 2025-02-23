@@ -1,3 +1,5 @@
+import { Title } from "#components";
+
 export default defineEventHandler(async (event) => {
   let { id } = event.context.params || {};
   id = decodeURIComponent(id);
@@ -20,12 +22,40 @@ export default defineEventHandler(async (event) => {
   const film = await prisma.film.findMany({
     where: { 
       archived_at: null,
-      OR: searchTerms.map(term => ({
-        title: {
-          contains: term,
-          mode: 'insensitive', // Optional: makes the search case-insensitive
+      OR: [
+        // Search in film title
+        ...searchTerms.map(term => ({
+          title: {
+            contains: term,
+            // mode: 'insensitive', // Optional: makes the search case-insensitive
+          },
+        })),
+        // Search in cast
+        {
+          cast: {
+            contains: id, // Check if cast contains id
+            // mode: 'insensitive', // Optional: makes the search case-insensitive
+          },
         },
-      })),
+        {
+          creator: {
+            contains: id, // Check if creator contains id
+          }
+        },
+        // Search in genre title
+        {
+          genres_relations: {
+            some: {
+              genre: {
+                title: {
+                  contains: id, // Check if genre title contains id
+                  // mode: 'insensitive', // Optional: makes the search case-insensitive
+                },
+              },
+            },
+          },
+        },
+      ],
     },
     include: {
       createdBy: true,

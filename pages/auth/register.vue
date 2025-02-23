@@ -1,5 +1,8 @@
 <script setup>
 import { useHead } from '#imports';
+import { inject } from 'vue';
+
+const toggleTheme = inject('toggleTheme')
 
 useHead({
 title: 'Register - Moreview',
@@ -61,7 +64,7 @@ const register = async () => {
 </script>
 
 <template>
-    <div class="d-flex align-center justify-center" style="height: 100vh; background-color: #f5f5f5;">
+    <div class="d-flex align-center justify-center" style="height: 100vh;">
         <v-container>
             <v-row>
                 <v-col cols="12" md="6" class="justify-center align-center d-none d-md-block">
@@ -88,8 +91,8 @@ const register = async () => {
                                 <v-text-field variant="outlined" v-model="password" label="Password" type="password" :rules="passwordRules"></v-text-field>
                                 <v-btn :disabled="!form" type="submit" color="primary" block class="mt-2">Register</v-btn>
                             </v-form>
-                            <v-btn color="transparent" variant="text" block class="mt-2 text-none" to="/auth/login" nuxt>
-                                <span class="text-black">Already have an account? <span class="font-weight-bold">Login</span></span>
+                            <v-btn variant="text" block class="mt-2 text-none" to="/auth/login" nuxt>
+                                <span>Already have an account? <span class="font-weight-bold">Login</span></span>
                             </v-btn>
                         </v-card>
                     </v-hover>

@@ -31,6 +31,19 @@ export default defineNuxtPlugin((nuxtApp) => {
             warning: "#FFB057",   // Warm complementary yellow-orange
           },
         },
+        customDark: {
+          dark: true, // Dark theme
+          colors: {
+            background: "#121212", // Dark gray for background
+            surface: "#1E1E1E",    // Slightly lighter gray for surface
+            primary: "#FF5757",   // Your primary color
+            secondary: "#FF8A57", // Soft complementary orange tone
+            error: "#FF3D3D",     // Slightly darker red for errors
+            info: "#57A9FF",      // Cool blue tone for info
+            success: "#57FF8A",   // Soft green for success
+            warning: "#FFB057",   // Warm complementary yellow-orange
+          }
+        }
       },
     },
     icons: {

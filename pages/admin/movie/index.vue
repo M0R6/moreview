@@ -1,6 +1,8 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import { useHead } from "#imports";
+
+const theme = inject("theme");
 
 useHead({
   title: "Manage Movies - Moreview",
@@ -32,7 +34,7 @@ const getAuthUser = async () => {
     if (!isAdmin.value) {
       showToast("Access denied", "error");
       setTimeout(() => {
-        window.location.href = "/";
+        navigateTo("/")
       }, 1000);
     }
   } catch (error) {
@@ -178,7 +180,7 @@ const addMovie = async () => {
     }
 
     showToast("Movie added successfully", "success");
-    window.location.reload();
+    fetchMovies();
   } catch (error) {
     console.error("Error adding movie:", error);
     showToast("Failed to add movie. Please try again.", "error");
@@ -188,6 +190,7 @@ const addMovie = async () => {
   }
 };
 
+const areYouSure = ref(false)
 // Delete Movie
 const deleteMovie = async (id) => {
   try {
@@ -200,7 +203,8 @@ const deleteMovie = async (id) => {
     }
 
     showToast("Movie deleted successfully", "success");
-    window.location.reload();
+    areYouSure.value = false;
+    fetchMovies();
   } catch (error) {
     console.error("Error deleting movie:", error);
     showToast("Error deleting movie", "error");
@@ -219,7 +223,7 @@ const archiveMovie = async (id) => {
     }
 
     showToast("Movie archived successfully", "success");
-    window.location.reload();
+    fetchMovies();
   } catch (error) {
     console.error("Error archiving movie:", error);
     showToast("Error archiving movie", "error");
@@ -238,7 +242,7 @@ const restoreMovie = async (id) => {
     }
 
     showToast("Movie restored successfully", "success");
-    window.location.reload();
+    fetchMovies();
   } catch (error) {
     console.error("Error restoring movie:", error);
     showToast("Error restoring movie", "error");
@@ -545,7 +549,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
       </v-card>
     </v-dialog>
     <v-dialog v-model="addMovieDialog">
-      <v-card color="white" width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+      <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
         <v-card-title class="d-flex align-center">
           <Icon
             class="mr-2 my-auto"
@@ -621,11 +625,9 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
               accept="image/*"
               variant="outlined"
             ></v-file-input>
-            <div class="d-flex justify-space-around my-5">
-              <v-btn @click="upload">Upload Trailer</v-btn>
-              <span class="d-flex align-center justify-center my-auto">or</span>
-              <v-btn @click="embed">Embed Trailer</v-btn>
-            </div>
+            <v-btn width="100%" class="d-flex mt-5" @click="embed">Embed Trailer</v-btn>
+            <span class="pa-2 text-center justify-center d-flex">or</span>
+            <v-btn width="100%" class="d-flex mb-5" @click="upload">Upload Trailer</v-btn>
             <v-file-input
               v-if="uploadTrailer"
               @input="handleTrailerInput"
@@ -658,7 +660,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
     </v-dialog>
 
     <!-- Movie Table -->
-    <v-card color="white" elevation="4">
+    <v-card elevation="4">
       <v-card-title class="d-flex justify-space-between flex-wrap">
         <div class="d-flex flex-wrap">
           <div class="d-flex align-center" width="100%">
@@ -690,7 +692,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
         </div>
       </v-card-title>
       <v-data-table
-        style="background-color: transparent"
+        color="white  "
         :headers="[
           { title: 'No.', align: 'start', sortable: false, key: 'index' },
           { title: 'Title', align: 'start', sortable: true, key: 'title' },
@@ -707,11 +709,17 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
             key: 'release_year',
           },
           {
-            title: 'Duration',
+            title: 'Duration/Episodes',
             align: 'start',
             sortable: true,
             key: 'duration',
           },
+          // {
+          //   title: 'Episodes',
+          //   align: 'start',
+          //   sortable: true,
+          //   key: 'episode',
+          // },
           { title: 'Rating', align: 'start', sortable: true, key: 'rating' },
           { title: 'Creator', align: 'start', sortable: true, key: 'creator' },
           { title: 'Castings', align: 'start', sortable: true, key: 'cast' },
@@ -753,6 +761,11 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
 
         <template v-slot:item.createdBy="{ item }">
           {{ item.createdBy.name }}
+        </template>
+
+        <template v-slot:item.duration="{ item }">
+          {{ item.typeMov === 'movie' && item.duration ? `${item.duration} minutes` 
+          : item.typeMov === 'series' && item.episode ? `${item.episode} episodes` : 'No Data' }}
         </template>
 
         <template v-slot:item.genre_relation="{ item }">
@@ -807,14 +820,37 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
               <v-icon>mdi-restore</v-icon>
             </v-btn>
             <v-btn
-              class="ma-1"
-              icon
-              @click="deleteMovie(item.id)"
-              color="error"
-            >
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
+            class="ma-1"
+            icon
+            @click="areYouSure = true"
+            color="error">
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
           </v-menu>
+          <v-dialog v-model="areYouSure">
+              <v-card
+                width="100%"
+                max-width="500px"
+                class="d-flex mx-auto my-auto"
+              >
+                <v-card-title class="d-flex align-center">
+                  <v-icon class="mr-2">mdi-alert</v-icon>
+                  <h2 class="text-wrap">Are you sure?</h2>
+                </v-card-title>
+                <v-card-text class="pt-0">
+                  <p>Are you sure you want to delete this genre?</p>
+                  <div class="mt-3">
+                    <v-btn
+                      class="mr-3"
+                      color="error"
+                      @click="deleteMovie(item.id)"
+                      >Yes</v-btn
+                    >
+                    <v-btn @click="areYouSure = false">No</v-btn>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </v-dialog>
         </template>
       </v-data-table>
     </v-card>
