@@ -9,7 +9,7 @@
         md="4"
         lg="3"
       >
-        <v-card color="transparent">
+        <v-card @click="navigateTo(`/series/${movie.id}`)" color="transparent">
           <v-card-title class="d-flex justify-center align-center">
             <span class="text-truncate text-center">{{ movie.title }}</span>
           </v-card-title>

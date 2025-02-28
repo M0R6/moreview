@@ -11,9 +11,14 @@ export default defineEventHandler(async (event) => {
   const { id } = params;
   const body = await readBody(event);
 
-  const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-  if (!existsSync(uploadsDir)) {
-    await mkdir(uploadsDir, { recursive: true });
+  const trailersDir = path.join(process.cwd(), 'public', 'uploads', 'trailers');
+  if (!existsSync(trailersDir)) {
+    await mkdir(trailersDir, { recursive: true });
+  }
+
+  const postersDir = path.join(process.cwd(), 'public', 'uploads', 'posters');
+  if (!existsSync(postersDir)) {
+    await mkdir(postersDir, { recursive: true });
   }
  
   let posterPath = null;
@@ -32,30 +37,30 @@ export default defineEventHandler(async (event) => {
   // Save poster file if provided and delete the old one
   if (body.poster) {
     if (currentFilm.poster) {
-      const oldPosterPath = path.join(uploadsDir, path.basename(currentFilm.poster));
+      const oldPosterPath = path.join(postersDir, path.basename(currentFilm.poster));
       await unlink(oldPosterPath).catch(() => console.warn("Failed to delete old poster"));
     }
     const posterFileName = `${uuidv4()}.jpg`; // Adjust the extension as needed
-    const posterFilePath = path.join(uploadsDir, posterFileName);
+    const posterFilePath = path.join(postersDir, posterFileName);
     const base64Data = body.poster.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, 'base64');
     await writeFile(posterFilePath, buffer);
-    posterPath = `/uploads/${posterFileName}`;
+    posterPath = `/uploads/posters/${posterFileName}`;
     console.log('Poster saved at:', posterPath);
   }
  
   // Save trailer file if provided and delete the old one
   if (body.trailer) {
     if (currentFilm.trailer) {
-      const oldTrailerPath = path.join(uploadsDir, path.basename(currentFilm.trailer));
+      const oldTrailerPath = path.join(trailersDir, path.basename(currentFilm.trailer));
       await unlink(oldTrailerPath).catch(() => console.warn("Failed to delete old trailer"));
     }
     const trailerFileName = `${uuidv4()}.mp4`; // Adjust the extension as needed
-    const trailerFilePath = path.join(uploadsDir, trailerFileName);
+    const trailerFilePath = path.join(trailersDir, trailerFileName);
     const base64Data = body.trailer.replace(/^data:video\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, 'base64');
     await writeFile(trailerFilePath, buffer);
-    trailerPath = `/uploads/${trailerFileName}`;
+    trailerPath = `/uploads/trailers/${trailerFileName}`;
     console.log('Trailer saved at:', trailerPath);
   }
 

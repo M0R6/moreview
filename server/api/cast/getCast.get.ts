@@ -1,13 +1,8 @@
 export default defineEventHandler(async (event) => {
-  const cast = await prisma.casting.findMany({
+  const cast = await prisma.cast.findMany({
     include: {
-      casting_relations: {
-         include: {
-            casting: true,
-         },
-      }
-    },
+      created_by: true,
+    }
   });
-
   return cast;
 });

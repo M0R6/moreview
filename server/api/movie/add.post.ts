@@ -14,9 +14,14 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-  if (!existsSync(uploadsDir)) {
-    await mkdir(uploadsDir, { recursive: true });
+  const posterUploadDir = path.join(process.cwd(), 'public', 'uploads', 'posters');
+  if (!existsSync(posterUploadDir)) {
+    await mkdir(posterUploadDir, { recursive: true });
+  }
+
+  const trailerUploadDir = path.join(process.cwd(), 'public', 'uploads', 'trailers');
+  if (!existsSync(trailerUploadDir)) {
+    await mkdir(trailerUploadDir, { recursive: true });
   }
 
   let posterPath = null;
@@ -25,22 +30,22 @@ export default defineEventHandler(async (event) => {
   // Save poster file if provided
   if (body.poster) {
     const posterFileName = `${uuidv4()}.jpg`; // Adjust the extension as needed
-    const posterFilePath = path.join(uploadsDir, posterFileName);
+    const posterFilePath = path.join(posterUploadDir, posterFileName);
     const base64Data = body.poster.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, 'base64');
     await writeFile(posterFilePath, buffer);
-    posterPath = `/uploads/${posterFileName}`;
+    posterPath = `/uploads/posters/${posterFileName}`;
     console.log('Poster saved at:', posterPath);
   }
 
   // Save trailer file if provided
   if (body.trailer) {
     const trailerFileName = `${uuidv4()}.mp4`; // Adjust the extension as needed
-    const trailerFilePath = path.join(uploadsDir, trailerFileName);
+    const trailerFilePath = path.join(trailerUploadDir, trailerFileName);
     const base64Data = body.trailer.replace(/^data:video\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, 'base64');
-    await writeFile(trailerFilePath, buffer);
-    trailerPath = `/uploads/${trailerFileName}`;
+    await writeFile(trailerFilePath, buffer); 
+    trailerPath = `/uploads/trailers/${trailerFileName}`;
     console.log('Trailer saved at:', trailerPath);
   }
 

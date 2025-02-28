@@ -24,7 +24,7 @@
     </v-row>
     <v-row>
       <v-col v-for="movie in movies" :key="movie.id" cols="12" sm="6" md="4" lg="3">
-        <v-card color="transparent">
+        <v-card @click="navigateTo(`/movie/${movie.id}`)" color="transparent">
           <v-card-title class="text-truncate text-center">{{ movie.title }}</v-card-title>
           <v-img :src="movie.poster" max-height="350px" height="100%"></v-img>
           <v-card-text class="text-truncate">{{ movie.description }}</v-card-text>

@@ -15,10 +15,11 @@
                 :key="index"
               >
                 <img
+                  @click="navigateItem(latest)"
                   :src="latest.poster"
                   alt="Latest movie poster"
                   height="300px"
-                  class="ma-3"
+                  class="ma-3 cursor-pointer"
                 />
               </v-slide-group-item>
             </v-slide-group>
@@ -36,7 +37,7 @@
         md="4"
         lg="3"
       >
-        <v-card :color="theme.global.name.value === 'customLight' ? 'transparent' : null">
+        <v-card @click="navigateItem(movie)" :color="theme.global.name.value === 'customLight' ? 'transparent' : null">
           <v-card-title class="d-flex justify-center align-center">
             <span class="text-truncate text-center">{{ movie.title }}</span>
           </v-card-title>
@@ -75,6 +76,14 @@ definePageMeta({
     unauthenticatedOnly: false,
   },
 });
+
+const navigateItem = (item) => {
+  if (item.typeMov === "movie") {
+    navigateTo(`/movie/${item.id}`);
+  } else {
+    navigateTo(`/series/${item.id}`);
+  }
+};
 
 const movies = ref([]);
 const latestMovie = ref([]);

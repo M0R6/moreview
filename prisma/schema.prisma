@@ -12,6 +12,7 @@ model users {
   name              String
   email             String    @unique
   password          String
+  photo             String?
   role              Role
   deleted_at        DateTime?
   created_at        DateTime
@@ -20,6 +21,8 @@ model users {
 
   // Relations
   films             Film[]
+  cast              Cast[]
+  film_casts        FilmCast[]
   comments          Comment[]
 }
 
@@ -47,7 +50,37 @@ model Film {
   createdBy         users     @relation(fields: [postedBy], references: [id])
   genres_relations  GenreRelation[]
   comments          Comment[]
+  film_casts        FilmCast[]
 }
+
+model Cast {
+  id                String    @id @default(uuid())
+  name              String
+  photo             String?
+  createdBy         String
+  created_at        DateTime @default(now())
+  updated_at        DateTime @default(now())
+
+  // Relations
+  film_casts        FilmCast[]
+  created_by        users     @relation(fields: [createdBy], references: [id])
+}
+
+model FilmCast {
+  id                String    @id @default(uuid())
+  film_id           String
+  cast_id           String
+  character_name    String?
+  createdBy         String
+  created_at        DateTime @default(now())
+  updated_at        DateTime @default(now())
+
+  // Relations
+  film              Film      @relation(fields: [film_id], references: [id], onDelete: Cascade)
+  cast              Cast      @relation(fields: [cast_id], references: [id], onDelete: Cascade)
+  created_by        users     @relation(fields: [createdBy], references: [id])
+}
+
 
 model Genre {
   id                String    @id @default(uuid())

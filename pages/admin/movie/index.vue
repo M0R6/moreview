@@ -61,6 +61,11 @@ const form = ref(false);
 const addMovieDialog = ref(false);
 const genres = ref([]);
 
+// Sort genres alphabetically by title
+const sortedGenres = computed(() => {
+  return genres.value.slice().sort((a, b) => a.title.localeCompare(b.title));
+});
+
 const uploadTrailer = ref(false);
 const embedTrailer = ref(false);
 
@@ -181,6 +186,7 @@ const addMovie = async () => {
 
     showToast("Movie added successfully", "success");
     fetchMovies();
+    addMovieDialog.value = false;
   } catch (error) {
     console.error("Error adding movie:", error);
     showToast("Failed to add movie. Please try again.", "error");
@@ -643,7 +649,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
             ></v-text-field>
             <v-select
               v-model="genreIds"
-              :items="genres"
+              :items="sortedGenres"
               item-title="title"
               item-value="id"
               label="Genres"
@@ -884,7 +890,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
             ></v-textarea>
             <v-text-field
               v-model="releaseYear"
-              label="Release Date"
+              label="Release Year"
               type="number"
               required
               variant="outlined"
@@ -943,7 +949,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
             ></v-text-field>
             <v-select
               v-model="genreIds"
-              :items="genres"
+              :items="sortedGenres"
               item-title="title"
               item-value="id"
               label="Genres"
