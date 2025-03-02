@@ -236,7 +236,7 @@ onMounted(async () => {
       <v-card-title class="d-flex justify-space-between flex-wrap">
         <div class="d-flex flex-wrap">
           <div class="d-flex align-center" width="100%">
-            <h2 class="mr-2">Movie Genres</h2>
+            <h2 class="mr-2">Casts</h2>
             <v-chip color="primary">{{ casts.length }}</v-chip>
           </div>
           <div class="align-center d-flex mt-2 mt-md-0 ml-0 ml-md-5">
@@ -279,12 +279,6 @@ onMounted(async () => {
             align: 'start',
             sortable: true,
             key: 'updated_at',
-          },
-          {
-            title: 'Created By',
-            align: 'start',
-            sortable: true,
-            key: 'created_by.name',
           },
           { title: 'Actions', align: 'start', sortable: false, key: 'actions' },
         ]"

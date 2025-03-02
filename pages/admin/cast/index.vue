@@ -234,7 +234,7 @@ onMounted(() => {
       <v-card-title class="d-flex justify-space-between flex-wrap">
         <div class="d-flex flex-wrap">
           <div class="d-flex align-center" width="100%">
-            <h2 class="mr-2">Movie Genres</h2>
+            <h2 class="mr-2">Casts</h2>
             <v-chip color="primary">{{ casts.length }}</v-chip>
           </div>
           <div class="align-center d-flex mt-2 mt-md-0 ml-0 ml-md-5">
@@ -293,6 +293,12 @@ onMounted(() => {
         <!-- Row Numbering -->
         <template v-slot:item.index="{ index }">
           {{ index + 1 }}
+        </template>
+        <template v-slot:item.name="{ item }">
+          <v-avatar>
+            <v-img :src="item.photo" />
+          </v-avatar>
+          <span class="ml-3">{{ item.name }}</span>
         </template>
         <!-- Date Formatting -->
         <template v-slot:item.created_at="{ item }">

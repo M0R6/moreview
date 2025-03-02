@@ -58,6 +58,11 @@ const form = ref(false);
 const addMovieDialog = ref(false);
 const genres = ref([]);
 
+// Sort genres alphabetically by title
+const sortedGenres = computed(() => {
+  return genres.value.slice().sort((a, b) => a.title.localeCompare(b.title));
+});
+
 const uploadTrailer = ref(false);
 const embedTrailer = ref(false);
 
@@ -178,6 +183,7 @@ const addMovie = async () => {
 
     showToast("Movie added successfully", "success");
     fetchMovies();
+    addMovieDialog.value = false;
   } catch (error) {
     console.error("Error adding movie:", error);
     showToast("Failed to add movie. Please try again.", "error");
@@ -254,7 +260,7 @@ const editMovie = (movie) => {
   title.value = movie.title;
   description.value = movie.description;
   poster.value = movie.poster;
-  movieType.value = movie.type;
+  movieType.value = movie.typeMov;
   releaseYear.value = movie.release_year;
   duration.value = movie.duration;
   episode.value = movie.episode;
@@ -544,7 +550,7 @@ const viewMovie = (movie) => {
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="addMovieDialog">
+    <v-dialog @after-leave="formNull" v-model="addMovieDialog">
       <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
         <v-card-title class="d-flex align-center">
           <Icon
@@ -590,6 +596,7 @@ const viewMovie = (movie) => {
               variant="outlined"
             ></v-text-field>
             <v-text-field
+              v-if="movieType === 'series'" 
               v-model="episode"
               type="number"
               label="Episode"
@@ -640,7 +647,7 @@ const viewMovie = (movie) => {
             ></v-text-field>
             <v-select
               v-model="genreIds"
-              :items="genres"
+              :items="sortedGenres"
               item-title="title"
               item-value="id"
               label="Genres"
@@ -648,7 +655,7 @@ const viewMovie = (movie) => {
               variant="outlined"
             ></v-select>
             <v-btn type="submit" color="primary">Add Movie</v-btn>
-            <v-btn @click="addMovieDialog = feditFalse" class="ml-2"
+            <v-btn @click="formNull" class="ml-2"
               >Cancel</v-btn
             >
           </v-form>
@@ -714,12 +721,6 @@ const viewMovie = (movie) => {
           { title: 'Rating', align: 'start', sortable: true, key: 'rating' },
           { title: 'Creator', align: 'start', sortable: true, key: 'creator' },
           { title: 'Castings', align: 'start', sortable: true, key: 'cast' },
-          {
-            title: 'Created By',
-            align: 'start',
-            sortable: true,
-            key: 'createdBy',
-          },
           {
             title: 'Created Date',
             align: 'start',
@@ -819,7 +820,7 @@ const viewMovie = (movie) => {
     </v-card>
 
     <!-- Edit Movie Dialog -->
-    <v-dialog v-model="editMovieDialog">
+    <v-dialog @after-leave="formNull" v-model="editMovieDialog">
       <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
         <v-card-title class="d-flex align-center">
           <v-icon class="mr-2">mdi-pencil</v-icon>

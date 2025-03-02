@@ -16,8 +16,9 @@
           <v-img
             v-if="movie.poster"
             :src="movie.poster"
-            max-height="350px"
-            height="100%"
+            height="400"
+            width="300"
+            cover
           ></v-img>
           <v-card-text class="text-truncate">{{
             movie.description

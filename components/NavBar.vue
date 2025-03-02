@@ -150,10 +150,11 @@ const search = () => {
                 </template>
             </v-list-item>
             <v-card color="transparent" elevation="0" v-if="adminBar" class="align-center">
-                <v-list-item prepend-icon="mdi-movie-roll" to="/admin/movie" title="Manage Movie"></v-list-item>
-                <v-list-item prepend-icon="mdi-shape-plus" to="/admin/genre" title="Manage Genre"></v-list-item>
-                <v-list-item prepend-icon="mdi-account-box-multiple" to="/admin/user" title="Manage User"></v-list-item>
+                <v-list-item prepend-icon="mdi-movie-roll" to="/admin/movie" title="Manage Movies"></v-list-item>
+                <v-list-item prepend-icon="mdi-shape-plus" to="/admin/genre" title="Manage Genres"></v-list-item>
+                <v-list-item prepend-icon="mdi-account-box-multiple" to="/admin/user" title="Manage Users"></v-list-item>
                 <v-list-item prepend-icon="mdi-face-man-shimmer" to="/admin/cast" title="Manage Casts"></v-list-item>
+                <v-list-item prepend-icon="mdi-account-arrow-right-outline" to="/admin/cast/assign" title="Assign Cast"></v-list-item>
             </v-card>
         </v-list>
 
@@ -166,7 +167,7 @@ const search = () => {
                 </template>
             </v-list-item>
             <v-card color="transparent" elevation="0" v-if="authorBar" class="align-center">
-                <v-list-item prepend-icon="mdi-movie-roll" to="/author/movie" title="Manage Movie"></v-list-item>
+                <v-list-item prepend-icon="mdi-movie-roll" to="/author/movie" title="Manage Movies"></v-list-item>
                 <v-list-item prepend-icon="mdi-face-man-shimmer" to="/author/cast" title="Manage Casts"></v-list-item>
             </v-card>
         </v-list>

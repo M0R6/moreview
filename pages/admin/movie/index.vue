@@ -554,7 +554,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="addMovieDialog">
+    <v-dialog @after-leave="formNull" v-model="addMovieDialog">
       <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
         <v-card-title class="d-flex align-center">
           <Icon
@@ -657,7 +657,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
               variant="outlined"
             ></v-select>
             <v-btn type="submit" color="primary">Add Movie</v-btn>
-            <v-btn @click="addMovieDialog = feditFalse" class="ml-2"
+            <v-btn @click="formNull" class="ml-2"
               >Cancel</v-btn
             >
           </v-form>
@@ -862,7 +862,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
     </v-card>
 
     <!-- Edit Movie Dialog -->
-    <v-dialog v-model="editMovieDialog">
+    <v-dialog @after-leave="formNull" v-model="editMovieDialog">
       <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
         <v-card-title class="d-flex align-center">
           <v-icon class="mr-2">mdi-pencil</v-icon>
