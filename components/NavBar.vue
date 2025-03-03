@@ -61,7 +61,7 @@ const search = () => {
 </script>
 
 <template>
-    <v-navigation-drawer :color="theme.global.name.value === 'customLight' ? 'transparent' : null" :elevation="12" v-model="drawer">
+    <v-navigation-drawer :color="theme.global.name.value === 'customLight' ? 'white' : null" :elevation="12" v-model="drawer">
 
         <v-list v-if="data" nav>
             <v-menu activator="parent">
