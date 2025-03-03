@@ -7,7 +7,9 @@ import { v4 as uuidv4 } from 'uuid';
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
 
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'profile');
+    const uploadBaseDir = '/var/www/moreview/uploads'; // New upload path
+
+    const uploadsDir = path.join(uploadBaseDir, 'profile');
     if (!existsSync(uploadsDir)) {
        await mkdir(uploadsDir, { recursive: true });
     }

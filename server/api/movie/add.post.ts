@@ -14,12 +14,14 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const posterUploadDir = path.join(process.cwd(), 'public', 'uploads', 'posters');
+  const uploadBaseDir = '/var/www/moreview/uploads'; // New upload path
+
+  const posterUploadDir = path.join(uploadBaseDir, 'posters');
   if (!existsSync(posterUploadDir)) {
     await mkdir(posterUploadDir, { recursive: true });
   }
 
-  const trailerUploadDir = path.join(process.cwd(), 'public', 'uploads', 'trailers');
+  const trailerUploadDir = path.join(uploadBaseDir, 'trailers');
   if (!existsSync(trailerUploadDir)) {
     await mkdir(trailerUploadDir, { recursive: true });
   }
@@ -44,7 +46,7 @@ export default defineEventHandler(async (event) => {
     const trailerFilePath = path.join(trailerUploadDir, trailerFileName);
     const base64Data = body.trailer.replace(/^data:video\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, 'base64');
-    await writeFile(trailerFilePath, buffer); 
+    await writeFile(trailerFilePath, buffer);
     trailerPath = `/uploads/trailers/${trailerFileName}`;
     console.log('Trailer saved at:', trailerPath);
   }

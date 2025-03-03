@@ -11,12 +11,14 @@ export default defineEventHandler(async (event) => {
   const { id } = params;
   const body = await readBody(event);
 
-  const trailersDir = path.join(process.cwd(), 'public', 'uploads', 'trailers');
+  const uploadBaseDir = '/var/www/moreview/uploads'; // New upload path
+
+  const trailersDir = path.join(uploadBaseDir, 'trailers');
   if (!existsSync(trailersDir)) {
     await mkdir(trailersDir, { recursive: true });
   }
 
-  const postersDir = path.join(process.cwd(), 'public', 'uploads', 'posters');
+  const postersDir = path.join(uploadBaseDir, 'posters');
   if (!existsSync(postersDir)) {
     await mkdir(postersDir, { recursive: true });
   }
