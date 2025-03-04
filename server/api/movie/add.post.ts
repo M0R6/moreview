@@ -6,14 +6,6 @@ import { v4 as uuidv4 } from 'uuid';
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
-  // Validate required fields
-  if (!body.title || !body.description || !body.rating || !body.creator) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Missing required fields (title, description, release_year, duration, rating, creator).',
-    });
-  }
-
   const uploadBaseDir = process.env.ENV_MODE === 'development' ? 'public/uploads' :'/var/www/moreview/uploads';
 
   const posterUploadDir = path.join(uploadBaseDir, 'posters');

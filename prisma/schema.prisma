@@ -108,7 +108,7 @@ model GenreRelation {
 model Comment {
   id                String    @id @default(uuid())
   comment           String
-  rating            CommentRating
+  rating            Int
   user_id           String
   film_id           String
   created_at        DateTime
@@ -123,14 +123,6 @@ enum Role {
   subs
   admin
   author
-}
-
-enum CommentRating {
-  one
-  two
-  three
-  four
-  five
 }
 
 enum Rate {

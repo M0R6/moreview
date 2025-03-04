@@ -20,6 +20,11 @@ export default defineEventHandler(async (event) => {
           genre: true,
         },
       },
+      comments: {
+        include: {
+          user: true,
+        },
+      },
     },
   });
 

@@ -147,9 +147,13 @@ const convertFileToBase64 = (file) => {
   });
 };
 
+const uploadLoading = ref(false);
+
 // Add Movie
 const addMovie = async () => {
   try {
+
+    uploadLoading.value = true;
 
     const posterBase64 = selectedPoster.value
       ? await convertFileToBase64(selectedPoster.value)
@@ -180,13 +184,15 @@ const addMovie = async () => {
     });
 
     if (error.value) {
+      uploadLoading.value = false;
       showToast(error.value.statusMessage, "error");
       return;
     }
 
     showToast("Movie added successfully", "success");
-    fetchMovies();
+    uploadLoading.value = false;
     addMovieDialog.value = false;
+    fetchMovies();
   } catch (error) {
     console.error("Error adding movie:", error);
     showToast("Failed to add movie. Please try again.", "error");
@@ -280,6 +286,8 @@ const editMovie = (movie) => {
 
 const updateMovie = async () => {
   try {
+    uploadLoading.value = true;
+
     const posterBase64 = selectedPoster.value
       ? await convertFileToBase64(selectedPoster.value)
       : null;
@@ -311,10 +319,12 @@ const updateMovie = async () => {
     );
 
     if (error.value) {
+      uploadLoading.value = false;
       showToast(error.value.statusMessage, "error");
       return;
     }
     showToast("Movie updated successfully", "success");
+    uploadLoading.value = false;
     editMovieDialog.value = false;
     fetchMovies();
   } catch (error) {
@@ -379,6 +389,20 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
 
 <template>
   <v-container v-if="isAdmin">
+    <v-dialog v-model="uploadLoading">
+      <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+        <v-card-title class="d-flex align-center">
+          <v-icon class="mr-2">mdi-upload</v-icon>
+          <h2 class="text-wrap">Uploading</h2>
+        </v-card-title>
+        <v-card-text>
+          <v-progress-linear
+            indeterminate
+            color="primary"
+          ></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <!-- View Movie Dialog -->
     <v-dialog v-model="viewMovieDialog" max-width="800px">
       <v-card>
