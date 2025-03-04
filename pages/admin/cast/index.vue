@@ -46,6 +46,7 @@ const showToast = inject("showToast");
 const name = ref("");
 const photo = ref(null);
 const form = ref(false);
+const uploadLoading = ref(false);
 
 const convertFileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -58,6 +59,8 @@ const convertFileToBase64 = (file) => {
 
 const addCast = async () => {
   try {
+    addItem.value = false;
+    uploadLoading.value = true;
     const photoBase64 = photo.value ? await convertFileToBase64(photo.value) : null;
 
     const { data, error } = await useFetch(`/api/cast/add`, {
@@ -70,14 +73,15 @@ const addCast = async () => {
     });
 
     if (error.value) {
+      uploadLoading.value = false;
       showToast(error.value.statusMessage, "error");
       return;
     }
 
     showToast(data.value.message, "success");
-    addItem.value = false;
     name.value = "";
     photo.value = null;
+    uploadLoading.value = false;
     fetchCasts();
   } catch (error) {
     console.error("Error during adding genre:", error);
@@ -204,6 +208,20 @@ onMounted(() => {
 </script>
 <template>
   <v-container v-if="isAdmin">
+    <v-dialog v-model="uploadLoading">
+      <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+        <v-card-title class="d-flex align-center">
+          <v-icon class="mr-2">mdi-upload</v-icon>
+          <h2 class="text-wrap">Uploading</h2>
+        </v-card-title>
+        <v-card-text>
+          <v-progress-linear
+            indeterminate
+            color="primary"
+          ></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="addItem">
       <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
         <v-card-title class="d-flex align-center">
@@ -362,12 +380,12 @@ onMounted(() => {
           <v-btn
             class="ma-1"
             icon
-            @click="areYouSure = true"
+            @click="areYouSure = true; selectedCast = item;"
             color="error"
           >
             <v-icon>mdi-delete</v-icon>
             <v-dialog v-model="areYouSure">
-              <v-card
+              <v-card 
                 width="100%"
                 max-width="500px"
                 class="d-flex mx-auto my-auto"
@@ -377,12 +395,12 @@ onMounted(() => {
                   <h2 class="text-wrap">Are you sure?</h2>
                 </v-card-title>
                 <v-card-text class="pt-0">
-                  <p>Are you sure you want to delete <span class="font-weight-bold">{{ item.name }}</span>?</p>
+                  <p>Are you sure you want to delete <span class="font-weight-bold">{{ selectedCast.name }}</span>?</p>
                   <div class="mt-3">
                     <v-btn
                       class="mr-3"
                       color="error"
-                      @click="deleteCast(item.id)"
+                      @click="deleteCast(selectedCast.id)"
                       >Yes</v-btn
                     >
                     <v-btn @click="areYouSure = false">No</v-btn>
