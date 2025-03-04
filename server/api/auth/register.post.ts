@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
 
-    const uploadBaseDir = '/var/www/moreview/uploads'; // New upload path
+    const uploadBaseDir = process.env.ENV_MODE === 'development' ? 'public/uploads' :'/var/www/moreview/uploads';
 
     const uploadsDir = path.join(uploadBaseDir, 'profile');
     if (!existsSync(uploadsDir)) {

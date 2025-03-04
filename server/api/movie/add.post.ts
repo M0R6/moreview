@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const uploadBaseDir = '/var/www/moreview/uploads'; // New upload path
+  const uploadBaseDir = process.env.ENV_MODE === 'development' ? 'public/uploads' :'/var/www/moreview/uploads';
 
   const posterUploadDir = path.join(uploadBaseDir, 'posters');
   if (!existsSync(posterUploadDir)) {
