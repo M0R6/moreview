@@ -116,7 +116,7 @@ model Comment {
 
   // Relations
   user              users      @relation(fields: [user_id], references: [id])
-  film              Film      @relation(fields: [film_id], references: [id])
+  film              Film      @relation(fields: [film_id], references: [id], onDelete: Cascade)
 }
 
 enum Role {
