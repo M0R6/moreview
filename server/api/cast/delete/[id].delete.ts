@@ -20,12 +20,14 @@ export default defineEventHandler(async (event) => {
             return { error: 'Movie not found' }
         }
 
+        const uploadDir = process.env.ENV_MODE === 'development' ? 'public' : 'var/www/moreview'
+
         // Construct the full paths to the files
-        const castPath = cast.photo ? path.join(process.cwd(), 'public', cast.photo) : null
+        const castPath = cast.photo ? path.join(process.cwd(), uploadDir, cast.photo) : null
 
         // Delete the files from the filesystem
         if (castPath && fs.existsSync(castPath)) {
-            fs.unlinkSync(castPath)
+            await fs.promises.unlink(castPath);
         }
 
         // Delete the movie record from the database

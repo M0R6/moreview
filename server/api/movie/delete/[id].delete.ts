@@ -28,11 +28,11 @@ export default defineEventHandler(async (event) => {
 
         // Delete the files from the filesystem
         if (trailerPath && fs.existsSync(trailerPath)) {
-            fs.unlinkSync(trailerPath)
+            await fs.promises.unlink(trailerPath);
         }
 
         if (posterPath && fs.existsSync(posterPath)) {
-            fs.unlinkSync(posterPath)
+            await fs.promises.unlink(posterPath);
         }
 
         // Delete the movie record from the database
