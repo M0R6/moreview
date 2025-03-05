@@ -20,9 +20,11 @@ export default defineEventHandler(async (event) => {
             return { error: 'Movie not found' }
         }
 
+        const uploadDir = process.env.ENV_MODE === 'development' ? 'public' : 'var/www/moreview'
+
         // Construct the full paths to the files
-        const trailerPath = film.trailer ? path.join(process.cwd(), 'public', film.trailer) : null
-        const posterPath = film.poster ? path.join(process.cwd(), 'public', film.poster) : null
+        const trailerPath = film.trailer ? path.join(process.cwd(), uploadDir, film.trailer) : null
+        const posterPath = film.poster ? path.join(process.cwd(), uploadDir, film.poster) : null
 
         // Delete the files from the filesystem
         if (trailerPath && fs.existsSync(trailerPath)) {
