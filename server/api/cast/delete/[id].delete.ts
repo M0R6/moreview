@@ -1,4 +1,4 @@
-import { exec } from 'child_process'
+import { unlink } from 'fs/promises';
 import { PrismaClient } from '@prisma/client'
 import fs from 'fs'
 import path from 'path'
@@ -21,18 +21,18 @@ export default defineEventHandler(async (event) => {
             return { error: 'Movie not found' }
         }
 
-        const uploadDir = process.env.ENV_MODE === 'development' ? 'public' : '/var/www/moreview'
+        const uploadDir = process.env.ENV_MODE === 'development' ? 'public' : '../../../var/www/moreview/'
 
         // Construct the full paths to the files
         const castPath = cast.photo ? path.join(process.cwd(), uploadDir, cast.photo) : null
 
         // Delete the files from the filesystem
-	if (castPath && fs.existsSync(castPath)) {
-            await fs.promises.unlink(castPath);
+        if (castPath) {
+            await unlink(castPath).catch(() => console.warn("Failed to delete old poster"));
             console.log("File deleted successfully!");
         } else {
             console.log("File not found or already deleted:", castPath);
-        }	
+        }
 
         // Delete the movie record from the database
         const deletedCast = await prisma.cast.delete({
