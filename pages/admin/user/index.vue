@@ -72,19 +72,19 @@ const addUser = async () => {
 const deleteUser = async (id) => {
    try {
       const response = await fetch(`/api/user/delete/${id}`, {
-         method: 'PATCH',
+         method: 'DELETE',
       })
 
       if (!response.ok) {
-         throw new Error('Failed to delete genre')
+         throw new Error('Failed to delete user')
       }
 
-      showToast('Genre updated successfully', 'success')
+      showToast('user deleted successfully', 'success')
       fetchUsers()
       areYouSure.value = false
    } catch (error) {
-      console.error('Error updating genre:', error)
-      showToast('Error updating genre', 'error')
+      console.error('Error deleting user:', error)
+      showToast('Error deleting user', 'error')
    }
 }
 
@@ -393,7 +393,7 @@ onMounted(() => {
             <v-btn icon v-else @click="unbanUser(item.id)" color="success">
                <v-icon>mdi-check-circle-outline</v-icon>
             </v-btn>
-            <v-btn v-if="item.deleted_at === null" class="ma-1" icon @click="areYouSure = true" color="error">
+            <v-btn v-if="item.deleted_at === null" class="ma-1" icon @click="areYouSure = true; selectedUser = item" color="error">
                <v-icon>mdi-delete</v-icon>
                <v-dialog v-model="areYouSure">
                   <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
@@ -402,9 +402,9 @@ onMounted(() => {
                         <h2 class="text-wrap">Are you sure?</h2>
                      </v-card-title>
                      <v-card-text class="pt-0">
-                        <p>Are you sure you want to delete this genre?</p>
+                        <p>Are you sure you want to delete {{ selectedUser.name }}?</p>
                         <div class="mt-3">
-                           <v-btn class="mr-3" color="error" @click="deleteUser(item.id)">Yes</v-btn>
+                           <v-btn class="mr-3" color="error" @click="deleteUser(selectedUser.id)">Yes</v-btn>
                            <v-btn @click="areYouSure = false">No</v-btn>
                         </div>
                      </v-card-text>

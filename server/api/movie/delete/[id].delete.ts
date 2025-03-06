@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
             return { error: 'Movie not found' }
         }
 
-        const uploadDir = process.env.ENV_MODE === 'development' ? 'public' : '/var/www/moreview'
+        const uploadDir = process.env.ENV_MODE === 'development' ? 'public' : '../../../var/www/moreview'
 
         // Construct the full paths to the files
         const trailerPath = film.trailer ? path.join(process.cwd(), uploadDir, film.trailer) : null

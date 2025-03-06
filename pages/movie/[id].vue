@@ -109,7 +109,7 @@
         <v-card color="transparent" elevation="5">
           <v-card-title class="text-h6">Comments</v-card-title>
           <v-row>
-            <v-col cols="4">
+            <v-col cols="12" md="4">
               <v-list style="background-color: transparent">
                 <v-list-item v-for="comment in movie?.comments" :key="comment.id">
                   <v-list-item-title class="d-flex align-center mb-3">
