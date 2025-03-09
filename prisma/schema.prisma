@@ -102,7 +102,7 @@ model GenreRelation {
 
   // Relations
   film              Film      @relation(fields: [film_id], references: [id], onDelete: Cascade)
-  genre             Genre     @relation(fields: [genre_id], references: [id])
+  genre             Genre     @relation(fields: [genre_id], references: [id], onDelete: Cascade)
 }
 
 model Comment {

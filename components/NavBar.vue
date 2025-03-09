@@ -169,6 +169,7 @@ const search = () => {
             <v-card color="transparent" elevation="0" v-if="authorBar" class="align-center">
                 <v-list-item prepend-icon="mdi-movie-roll" to="/author/movie" title="Manage Movies"></v-list-item>
                 <v-list-item prepend-icon="mdi-face-man-shimmer" to="/author/cast" title="Manage Casts"></v-list-item>
+                <v-list-item prepend-icon="mdi-account-arrow-right-outline" to="/author/assign" title="Assign Casts"></v-list-item>
             </v-card>
         </v-list>
 
@@ -180,7 +181,7 @@ const search = () => {
                     <span class="font-weight-bold">Genre</span>
                 </template>
             </v-list-item>
-            <v-card elevation="0" v-if="genre" class="align-center">
+            <v-card color="transparent" elevation="0" v-if="genre" class="align-center">
                 <v-list-item
                     v-for="(genre, index) in genres" 
                     :key="index"

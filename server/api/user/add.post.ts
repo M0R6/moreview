@@ -1,6 +1,9 @@
 import { hash } from "bcrypt"
 
 export default defineEventHandler(async (event) => {
+
+    hasAccess(event, ['admin'])
+
     const body = await readBody(event)
 
     const userExists = await prisma.users.findFirst({

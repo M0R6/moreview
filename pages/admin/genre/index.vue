@@ -238,12 +238,6 @@ onMounted(() => {
             sortable: true,
             key: 'updated_at',
           },
-          {
-            title: 'Deleted Date',
-            align: 'start',
-            sortable: true,
-            key: 'deleted_at',
-          },
           { title: 'Actions', align: 'start', sortable: false, key: 'actions' },
         ]"
         :search="search"
@@ -261,9 +255,6 @@ onMounted(() => {
         </template>
         <template v-slot:item.updated_at="{ item }">
           {{ formatDate(item.updated_at) }}
-        </template>
-        <template v-slot:item.deleted_at="{ item }">
-          {{ item.deleted_at ? formatDate(item.deleted_at) : "-" }}
         </template>
         <!-- Actions Column -->
         <template v-slot:item.actions="{ item }">
@@ -294,10 +285,9 @@ onMounted(() => {
             </v-dialog>
           </v-btn>
           <v-btn
-            v-if="item.deleted_at === null"
             class="ma-1"
             icon
-            @click="areYouSure = true"
+            @click="areYouSure = true; selectedItemId = item.id"
             color="error"
           >
             <v-icon>mdi-delete</v-icon>
@@ -312,12 +302,12 @@ onMounted(() => {
                   <h2 class="text-wrap">Are you sure?</h2>
                 </v-card-title>
                 <v-card-text class="pt-0">
-                  <p>Are you sure you want to delete this genre?</p>
+                  <p>Are you sure you want to delete this {{ selectedItemId }} genre?</p>
                   <div class="mt-3">
                     <v-btn
                       class="mr-3"
                       color="error"
-                      @click="deleteGenre(item.id)"
+                      @click="deleteGenre(selectedItemId)"
                       >Yes</v-btn
                     >
                     <v-btn @click="areYouSure = false">No</v-btn>
@@ -325,16 +315,7 @@ onMounted(() => {
                 </v-card-text>
               </v-card>
             </v-dialog>
-          </v-btn>
-          <v-btn
-            v-else
-            class="ma-1"
-            icon
-            @click="restoreItem(item.id)"
-            color="success"
-          >
-            <v-icon>mdi-restore</v-icon>
-          </v-btn>
+          </v-btn>  
         </template>
       </v-data-table>
     </v-card>

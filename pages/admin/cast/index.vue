@@ -313,8 +313,19 @@ onMounted(() => {
           {{ index + 1 }}
         </template>
         <template v-slot:item.name="{ item }">
-          <v-avatar>
+          <v-avatar v-if="item.photo">
             <v-img :src="item.photo" />
+          </v-avatar>
+          <v-avatar color="secondary" v-else>
+            {{
+              item.name &&
+              item.name.split(" ").length > 1
+                ? item.name.split(" ")[0].charAt(0) +
+                  item.name.split(" ").slice(-1)[0].charAt(0)
+                : item.name
+                ? item.name.charAt(0)
+                : ""
+            }}
           </v-avatar>
           <span class="ml-3">{{ item.name }}</span>
         </template>

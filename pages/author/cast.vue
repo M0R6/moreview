@@ -104,22 +104,6 @@ const deleteCast = async (id) => {
   }
 };
 
-const restoreItem = async (id) => {
-  try {
-    const response = await fetch(`/api/genre/restore/${id}`, {
-      method: "PATCH",
-    });
-    if (!response.ok) {
-      throw new Error("Failed to restore genre");
-    }
-    showToast("Genre restored successfully", "success");
-    fetchCasts();
-  } catch (error) {
-    console.error("Error restoring genre:", error);
-    showToast("Error restoring genre", "error");
-  }
-};
-
 const editItemDialog = ref(false);
 const editForm = ref(false);
 const editName = ref("");
@@ -273,6 +257,12 @@ onMounted(async () => {
             align: 'start',
             sortable: true,
             key: 'created_at',
+          },
+          {
+            title: 'Created By',
+            align: 'start',
+            sortable: true,
+            key: 'created_by.name',
           },
           {
             title: 'Updated Date',

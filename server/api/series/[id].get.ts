@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   const film = await prisma.film.findFirst({
     where: {
       id: id,
-      typeMov: 'series',
+      typeMov: 'series', // Additional condition
     },
     include: {
       createdBy: true,
@@ -20,6 +20,16 @@ export default defineEventHandler(async (event) => {
           genre: true,
         },
       },
+      comments: {
+        include: {
+          user: true,
+        },
+      },
+      film_casts: {
+        include: {
+          cast: true,
+        },
+      }
     },
   });
 

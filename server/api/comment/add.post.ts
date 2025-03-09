@@ -1,4 +1,7 @@
+import { hasAccess } from "~/server/utils/permission"
 export default defineEventHandler(async (event) => {
+  hasAccess(event, ['admin', 'author', 'subs'])
+
   const body = await readBody(event)
 
   const commented = await prisma.comment.findFirst({

@@ -1,9 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 import { hash } from "bcrypt"
-
+import { hasAccess } from '~/server/utils/permission'
 const prisma = new PrismaClient()
 
 export default defineEventHandler(async (event) => {
+    hasAccess(event, ['admin', 'subs', 'author'])
     try {
         const { id } = getRouterParams(event) // Get the user ID from the URL
         const body = await readBody(event) // Get the request body

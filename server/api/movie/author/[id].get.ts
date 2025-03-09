@@ -1,4 +1,9 @@
+import { hasAccess } from "~/server/utils/permission";
+
 export default defineEventHandler(async (event) => {
+
+  hasAccess(event, ['author']);
+  
   const { id } = event.context.params || {};
 
   if (!id) {
@@ -28,12 +33,12 @@ export default defineEventHandler(async (event) => {
       },
     });
 
-    if (!films || films.length === 0) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'No movies found for this user',
-      });
-    }
+    // if (!films || films.length === 0) {
+    //   throw createError({
+    //     statusCode: 404,
+    //     statusMessage: 'No movies found for this user',
+    //   });
+    // }
 
     return films;
   } catch (error) {

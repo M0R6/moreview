@@ -57,6 +57,28 @@
                   </v-chip>
                 </v-chip-group>
               </v-card-text>
+              <div class="mb-4">
+                <v-rating
+                  :model-value="averageRating"
+                  half-increments
+                  readonly
+                  :length="5"
+                  :size="24"
+                  color="white"
+                  active-color="primary"
+                  empty-icon="mdi-heart-outline"
+                  half-icon="mdi-heart-half-full"
+                  full-icon="mdi-heart"
+                >
+                </v-rating>
+                <br />
+                <span class="text-white"
+                  >{{ averageRating.toFixed(2) }} / 5 ({{
+                    movie.comments.length
+                  }}
+                  {{ movie.comments.length > 1 ? "reviews" : "review" }})</span
+                >
+              </div>
               <div
                 @click="playTrailer = true"
                 class="cursor-pointer d-flex align-center"
@@ -66,6 +88,52 @@
                 </v-btn>
                 <v-card-title class="text-white"> Watch Trailer </v-card-title>
               </div>
+              <v-card
+                width="100vh"
+                max-width="100%"
+                color="transparent"
+                elevation="0"
+              >
+                <v-card-title class="text-white text-center text-h6"
+                  >Top Casts</v-card-title
+                >
+                <v-slide-group class="d-flex justify-start" align="start">
+                  <v-slide-group-item
+                    class="d-flex align-center"
+                    v-for="cast in movie.film_casts"
+                    :key="cast.id"
+                  >
+                    <v-avatar v-if="cast.cast.photo" size="100">
+                      <v-img
+                        :src="cast.cast.photo"
+                        width="150"
+                        height="200"
+                        class="d-flex align-center"
+                        cover
+                      ></v-img>
+                    </v-avatar>
+                    <v-avatar v-else color="secondary" size="100">
+                      {{
+                        cast.cast.name &&
+                        cast.cast.name.split(" ").length > 1
+                          ? cast.cast.name.split(" ")[0].charAt(0) +
+                            cast.cast.name.split(" ").slice(-1)[0].charAt(0)
+                          : cast.cast.name
+                          ? cast.cast.name.charAt(0)
+                          : ""
+                      }}
+                    </v-avatar>
+                    <div class="mx-3 my-auto">
+                      <v-card-title class="text-white pa-0">{{
+                        cast.cast.name
+                      }}</v-card-title>
+                      <v-card-subtitle class="text-white pa-0">{{
+                        cast.character_name
+                      }}</v-card-subtitle>
+                    </div>
+                  </v-slide-group-item>
+                </v-slide-group>
+              </v-card>
             </v-col>
           </v-row>
         </v-card>
@@ -74,7 +142,7 @@
         >
       </v-col>
     </v-row>
-    <v-row>
+    <v-row v-if="movie">
       <v-col cols="12">
         <v-card
           v-if="data"
@@ -106,15 +174,36 @@
         </v-card>
       </v-col>
       <v-col cols="12">
-        <v-card color="transparent" elevation="5">
-          <v-card-title class="text-h6">Comments</v-card-title>
+        <v-card-title class="text-h6">Comments</v-card-title>
+        <v-card
+          max-height="500px"
+          class="overflow-auto"
+          color="transparent"
+          elevation="5"
+        >
           <v-row>
-            <v-col cols="12" md="4">
+            <v-col
+              v-for="comment in movie?.comments"
+              :key="comment.id"
+              cols="12"
+              md="4"
+            >
               <v-list style="background-color: transparent">
-                <v-list-item v-for="comment in movie?.comments" :key="comment.id">
+                <v-list-item>
                   <v-list-item-title class="d-flex align-center mb-3">
-                    <v-avatar>
+                    <v-avatar v-if="comment.user.photo">
                       <v-img :src="comment.user.photo" alt="avatar"></v-img>
+                    </v-avatar>
+                    <v-avatar v-else color="secondary">
+                      {{
+                        comment.user.name &&
+                        comment.user.name.split(" ").length > 1
+                          ? comment.user.name.split(" ")[0].charAt(0) +
+                            comment.user.name.split(" ").slice(-1)[0].charAt(0)
+                          : comment.user.name
+                          ? comment.user.name.charAt(0)
+                          : ""
+                      }}
                     </v-avatar>
                     <span class="ml-3">{{ comment.user.name }}</span>
                   </v-list-item-title>
@@ -166,6 +255,13 @@
   </v-container>
 </template>
 
+<style>
+.v-slide-group__prev,
+.v-slide-group__next {
+  display: none !important;
+}
+</style>
+
 <script setup>
 import { useRoute } from "vue-router";
 import { ref, onMounted, inject } from "vue";
@@ -177,6 +273,7 @@ const route = useRoute();
 const movie = ref(null);
 const error = ref(null);
 const form = ref(false);
+const averageRating = ref(0);
 
 definePageMeta({
   auth: {
@@ -191,6 +288,11 @@ const fetchMovieDetails = async () => {
       throw new Error(`Error ${response.status}: ${await response.text()}`);
 
     movie.value = await response.json();
+    averageRating.value = movie.value.comments.reduce(
+      (acc, comment) => acc + comment.rating,
+      0
+    );
+    averageRating.value /= movie.value.comments.length;
   } catch (err) {
     console.error("Error fetching movie:", err);
     error.value = err.message;

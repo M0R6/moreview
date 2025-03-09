@@ -26,7 +26,7 @@ const { $moment } = useNuxtApp();
 const { data } = useAuth();
 
 const userA = ref(null);
-const isAdmin = computed(() => userA.value?.role === "admin");
+const isAdmin = computed(() => userA.value?.role === "author");
 const showToast = inject("showToast");
 
 const getAuthUser = async () => {
@@ -81,7 +81,6 @@ const addCastRelation = async () => {
   }
 };
 
-
 const movies = ref([]) // Fetch from API
 const castList = ref([]) // Fetch from API
 const selectedFilm = ref('')
@@ -90,7 +89,7 @@ const characterName = ref('')
 
 const fetchMovies = async () => {
   try {
-    const response = await fetch("/api/movie/getMovie");
+    const response = await fetch(`/api/movie/author/${userA.value.id}`);
     if (!response.ok) {
       throw new Error("Failed to fetch movies");
     }

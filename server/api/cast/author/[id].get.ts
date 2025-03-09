@@ -1,4 +1,6 @@
+import { hasAccess } from "~/server/utils/permission";
 export default defineEventHandler(async (event) => {
+  hasAccess(event, ['author']);
   const { id } = event.context.params || {};
 
   if (!id) {
@@ -11,10 +13,26 @@ export default defineEventHandler(async (event) => {
   try {
     const cast = await prisma.cast.findMany({
       where: {
-        createdBy: id,
+        OR: [
+          { createdBy: id },
+          {
+            film_casts: {
+              some: {
+                film: {
+                  postedBy: id,
+                },
+              },
+            },
+          },
+        ],
       },
       include: {
         created_by: true,
+        film_casts: {
+          include: {
+            film: true,
+          },
+        },
       },
     });
 

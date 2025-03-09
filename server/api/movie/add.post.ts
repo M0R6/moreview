@@ -2,8 +2,12 @@ import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { hasAccess } from '~/server/utils/permission';
 
 export default defineEventHandler(async (event) => {
+
+  hasAccess(event, ['admin', 'author']);
+
   const body = await readBody(event);
 
   const uploadBaseDir = process.env.ENV_MODE === 'development' ? 'public/uploads' :'/var/www/moreview/uploads';

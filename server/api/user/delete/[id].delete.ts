@@ -2,10 +2,14 @@ import { PrismaClient } from '@prisma/client'
 import { unlink } from 'fs/promises';
 import fs from 'fs'
 import path from 'path'
+import { hasAccess } from '~/server/utils/permission'
 
 const prisma = new PrismaClient()
 
 export default defineEventHandler(async (event) => {
+
+    hasAccess(event, ['admin'])
+
     try {
         const { id } = getRouterParams(event)
         if (!id) {

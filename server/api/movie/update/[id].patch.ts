@@ -2,8 +2,10 @@ import { writeFile, mkdir, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { hasAccess } from '~/server/utils/permission';
 
 export default defineEventHandler(async (event) => {
+  hasAccess(event, ['admin', 'author']);
   const { params } = event.context;
   if (!params || !params.id) {
     throw new Error("Missing film ID");

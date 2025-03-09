@@ -25,6 +25,11 @@ export default defineEventHandler(async (event) => {
           user: true,
         },
       },
+      film_casts: {
+        include: {
+          cast: true,
+        },
+      }
     },
   });
 

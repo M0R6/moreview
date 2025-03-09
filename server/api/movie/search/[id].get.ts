@@ -1,5 +1,3 @@
-import { Title } from "#components";
-
 export default defineEventHandler(async (event) => {
   let { id } = event.context.params || {};
   id = decodeURIComponent(id);
@@ -55,6 +53,26 @@ export default defineEventHandler(async (event) => {
             },
           },
         },
+        {
+          film_casts: {
+            some: {
+              OR: [
+                {
+                  cast: {
+                    name: {
+                      contains: id,
+                    }
+                  }
+                },
+                {
+                  character_name: {
+                    contains: id,
+                  }
+                }
+              ]
+            }
+          }
+        }
       ],
     },
     include: {

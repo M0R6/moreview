@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client'
-
+import { hasAccess } from '~/server/utils/permission'
 const prisma = new PrismaClient()
 
 export default defineEventHandler(async (event) => {
+    hasAccess(event, ['admin'])
     try {
         const { id } = getRouterParams(event) // Get the genre ID from the URL
         const { title } = await readBody(event) // Get the new title from the request body
