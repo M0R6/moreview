@@ -42,6 +42,7 @@ const getAuthUser = async () => {
 
 const { $moment } = useNuxtApp()
 const showToast = inject('showToast')
+const theme = inject('theme')
 const name = ref('')
 const email = ref('')
 const role = ref('subs')
@@ -204,19 +205,85 @@ const addItem = ref(false)
 const areYouSure = ref(false)
 
 const fetchUsers = async () => {
-    try {
-        const response = await fetch('/api/user/manageUsers')
-        loading.value = false
-        if (!response.ok) {
-            throw new Error('Failed to fetch genres')
-        }
-        const data = await response.json()
-        console.log("Fetched Data:", data)
-        users.value = data || []
+   try {
+      const response = await fetch('/api/user/manageUsers')
+      loading.value = false
+      if (!response.ok) {
+         throw new Error('Failed to fetch users')
+      }
+      const fetchedData = await response.json()
+      console.log("Fetched Data:", fetchedData)
+      users.value = fetchedData.filter(user => user.id !== data.value.user.id) || []
     } catch (error) {
         console.error("Error fetching genres:", error)
     }
 }
+
+const selectedUsers = ref([]);
+const bulkDeleteDialog = ref(false);
+const bulkBanDialog = ref(false);
+
+const deleteSelectedUsers = async () => {
+  if (selectedUsers.value.length === 0) {
+    showToast("No Genres selected", "warning");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/user/delete/bulk", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ids: selectedUsers.value }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to delete Genres");
+    }
+
+    showToast("Genres deleted successfully", "success");
+    selectedUsers.value = []; // Clear selection
+    bulkDeleteDialog.value = false;
+    fetchUsers(); // Refresh the list
+  } catch (error) {
+    console.error("Error deleting Genres:", error);
+    showToast("Error deleting Genres", "error");
+  }
+};
+
+const banSelectedUsers = async () => {
+  if (selectedUsers.value.length === 0) {
+    showToast("No Genres selected", "warning");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/user/ban/bulk", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ids: selectedUsers.value }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to ban users");
+    }
+
+    showToast("Users banned successfully", "success");
+    selectedUsers.value = []; // Clear selection
+    bulkBanDialog.value = false;
+    fetchUsers(); // Refresh the list
+  } catch (error) {
+    console.error("Error banning users:", error);
+    showToast("Error banning users", "error");
+  }
+};
 
 onMounted(() => {
     fetchUsers()
@@ -225,6 +292,74 @@ onMounted(() => {
 </script>
 <template>
    <v-container v-if="isAdmin">
+
+
+      <v-dialog v-model="editItemDialog">
+         <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+            <v-card-title class="d-flex align-center">
+               <v-icon class="mr-2">mdi-pencil</v-icon>
+               <h2 class="text-wrap">Edit User</h2>
+            </v-card-title>
+            <v-card-text>
+               <v-form v-model="editForm" @submit.prevent="updateUser">
+                  <v-text-field
+                     v-model="editName"
+                     label="Name"
+                     required
+                     variant="outlined"
+                  ></v-text-field>
+                  <v-text-field
+                     v-model="editEmail"
+                     label="E-mail"
+                     required
+                     variant="outlined"
+                  ></v-text-field>
+                  <v-select
+                     v-model="editRole"
+                     :items="['admin', 'author', 'subs']"
+                     label="Role"
+                     required
+                     variant="outlined"
+                  ></v-select>
+                  <v-text-field
+                     v-model="editPass"
+                     label="Password"
+                     type="password"
+                     variant="outlined"
+                  ></v-text-field>
+                  <v-btn type="submit" color="primary">Update User</v-btn>
+                  <v-btn class="ml-2" @click="editItemDialog = false">Cancel</v-btn>
+               </v-form>
+            </v-card-text>
+         </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="bulkDeleteDialog">
+         <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+         <v-card-title>Are you sure?</v-card-title>
+         <v-card-text>
+            Are you sure you want to delete <strong>{{ selectedUsers.length }}</strong> selected users? <br> <span class="text-error font-weight-bold">all data created by these selected users will be deleted.</span>
+         </v-card-text>
+         <v-card-actions>
+            <v-btn color="error" @click="deleteSelectedUsers">Yes</v-btn>
+            <v-btn @click="bulkDeleteDialog = false">No</v-btn>
+         </v-card-actions>
+         </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="bulkBanDialog">
+         <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+         <v-card-title>Are you sure?</v-card-title>
+         <v-card-text>
+            Are you sure you want to ban <strong>{{ selectedUsers.length }}</strong> selected items?
+         </v-card-text>
+         <v-card-actions>
+            <v-btn color="secondary" @click="banSelectedUsers">Yes</v-btn>
+            <v-btn @click="bulkBanDialog = false">No</v-btn>
+         </v-card-actions>
+         </v-card>
+      </v-dialog>
+
       <v-dialog v-model="addItem">
          <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
             <v-card-title class="d-flex align-center">
@@ -282,7 +417,7 @@ onMounted(() => {
             </v-card-text>
          </v-card>
       </v-dialog>
-      <v-card elevation="4">
+      <v-card elevation="4" :color="theme.global.name.value === 'customLight' ? 'white' : null">
          <v-card-title class="d-flex justify-space-between flex-wrap">
             <div class="d-flex flex-wrap">
                <div class="d-flex align-center" width="100%">   
@@ -294,6 +429,25 @@ onMounted(() => {
                </div>
             </div>
             <div>
+               <v-btn 
+                  color="secondary" 
+                  class="mt-3" 
+                  :disabled="selectedUsers.length === 0"
+                  v-if="selectedUsers.length > 0"
+                  @click="bulkBanDialog = true"
+               >
+                  <v-icon left>mdi-cancel</v-icon> Ban Selected ({{ selectedUsers.length }})
+               </v-btn>
+               <br>
+               <v-btn 
+                  color="error" 
+                  class="mt-3" 
+                  :disabled="selectedUsers.length === 0"
+                  v-if="selectedUsers.length > 0"
+                  @click="bulkDeleteDialog = true"
+               >
+                  <v-icon left>mdi-delete</v-icon> Delete Selected ({{ selectedUsers.length }})
+               </v-btn>
                <v-text-field
                :loading="loading"
                append-inner-icon="mdi-magnify"
@@ -310,7 +464,7 @@ onMounted(() => {
             </div>
          </v-card-title>
          <v-data-table
-         style="background-color: transparent;"
+         :style="{ backgroundColor: theme.global.name.value === 'customLight' ? 'white' : null }"
          :headers="[
             { title: 'No.', align: 'start', sortable: false, key: 'index' },
             { title: 'Name', align: 'start', sortable: false, key: 'name' },
@@ -325,6 +479,8 @@ onMounted(() => {
          :search="search"
          :items="users"
          :loading="loading"
+         v-model="selectedUsers"
+         show-select
          >
          <template v-slot:item.index="{ index }">
             {{ index + 1 }}
@@ -346,46 +502,14 @@ onMounted(() => {
             {{ item.deleted_at ? formatDate(item.deleted_at) : '-' }}
          </template>
          <template v-slot:item.actions="{ item }">
+          <v-menu location="start" offset-y>
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" icon>
+                <v-icon>mdi-dots-vertical</v-icon>
+              </v-btn>
+            </template>
             <v-btn class="ma-1" icon @click="editItem(item)">
                <v-icon>mdi-pencil</v-icon>
-               <v-dialog v-model="editItemDialog">
-                  <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
-                     <v-card-title class="d-flex align-center">
-                        <v-icon class="mr-2">mdi-pencil</v-icon>
-                        <h2 class="text-wrap">Edit Genre</h2>
-                     </v-card-title>
-                     <v-card-text>
-                        <v-form v-model="editForm" @submit.prevent="updateUser">
-                           <v-text-field
-                              v-model="editName"
-                              label="Name"
-                              required
-                              variant="outlined"
-                           ></v-text-field>
-                           <v-text-field
-                              v-model="editEmail"
-                              label="E-mail"
-                              required
-                              variant="outlined"
-                           ></v-text-field>
-                           <v-select
-                              v-model="editRole"
-                              :items="['admin', 'author', 'subs']"
-                              label="Role"
-                              required
-                              variant="outlined"
-                           ></v-select>
-                           <v-text-field
-                              v-model="editPass"
-                              label="Password"
-                              type="password"
-                              variant="outlined"
-                           ></v-text-field>
-                           <v-btn type="submit" color="primary">Update Genre</v-btn>
-                        </v-form>
-                     </v-card-text>
-                  </v-card>
-               </v-dialog>
             </v-btn>
             <v-btn v-if="item.isActive === true" @click="banUser(item.id)" icon color="secondary">
                <v-icon>mdi-cancel</v-icon>
@@ -414,6 +538,7 @@ onMounted(() => {
             <v-btn v-else class="ma-1" icon @click="restoreItem(item.id)" color="success">
                <v-icon>mdi-restore</v-icon>
             </v-btn>
+         </v-menu>
          </template>
          </v-data-table>
       </v-card> 

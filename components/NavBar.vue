@@ -22,7 +22,9 @@ const fetchGenres = async () => {
 
 onMounted(() => {
     fetchGenres()
-    fetchUser()
+    if (data.value) {
+        fetchUser()
+    }
 })
 
 const { data, signOut } = useAuth()
@@ -50,7 +52,7 @@ const adminBar = ref(false)
 const authorBar = ref(false)
 const genre = ref(null)
 const dialogSignOut = ref(false)
-const user = ref([])
+const user = ref({})
 const searchQuery = ref('')
 
 const search = () => {
@@ -81,8 +83,10 @@ const search = () => {
                     </v-avatar>
                 </template>
                 <v-list-item-title>
-                    <span class="text-wrap font-weight-bold">{{ user.name + ' ' }}</span>
-                    <span class="text-wrap">{{ user.role === 'admin' ? '(Admin)' : user.role === 'author' ? '(Author)' : null }}</span> <br>
+                    <div class="d-flex align-center">
+                        <span class="text-truncate font-weight-bold">{{ user.name ? user.name.substring(0, 10) : '' }}</span>
+                        <v-chip variant="text" class="ml-2" :prepend-icon="user.role === 'admin' ? 'mdi-shield-crown-outline' : user.role === 'author' ? 'mdi-pencil-plus-outline' : null" size="x-small">{{ user.role === 'admin' ? 'Admin' : user.role === 'author' ? 'Author' : null }}</v-chip>
+                    </div>
                     <span class="text-wrap">{{ user.email }}</span>
                 </v-list-item-title>
             </v-list-item>
@@ -151,10 +155,10 @@ const search = () => {
             </v-list-item>
             <v-card color="transparent" elevation="0" v-if="adminBar" class="align-center">
                 <v-list-item prepend-icon="mdi-movie-roll" to="/admin/movie" title="Manage Movies"></v-list-item>
+                <v-list-item prepend-icon="mdi-comment-account-outline" to="/admin/comments" title="Manage Comments"></v-list-item>
                 <v-list-item prepend-icon="mdi-shape-plus" to="/admin/genre" title="Manage Genres"></v-list-item>
                 <v-list-item prepend-icon="mdi-account-box-multiple" to="/admin/user" title="Manage Users"></v-list-item>
                 <v-list-item prepend-icon="mdi-face-man-shimmer" to="/admin/cast" title="Manage Casts"></v-list-item>
-                <v-list-item prepend-icon="mdi-account-arrow-right-outline" to="/admin/cast/assign" title="Assign Cast"></v-list-item>
             </v-card>
         </v-list>
 
@@ -169,7 +173,6 @@ const search = () => {
             <v-card color="transparent" elevation="0" v-if="authorBar" class="align-center">
                 <v-list-item prepend-icon="mdi-movie-roll" to="/author/movie" title="Manage Movies"></v-list-item>
                 <v-list-item prepend-icon="mdi-face-man-shimmer" to="/author/cast" title="Manage Casts"></v-list-item>
-                <v-list-item prepend-icon="mdi-account-arrow-right-outline" to="/author/assign" title="Assign Casts"></v-list-item>
             </v-card>
         </v-list>
 
@@ -185,7 +188,7 @@ const search = () => {
                 <v-list-item
                     v-for="(genre, index) in genres" 
                     :key="index"
-                    :to="`/genre/${genre.id}`">
+                    :to="`/search/${genre.title}`">
                     <template v-slot:title>
                         <span class="text-wrap">{{ genre.title }}</span>
                     </template>
@@ -215,7 +218,7 @@ const search = () => {
     <v-app-bar :color="theme.global.name.value === 'customLight' ? 'white' : null" elevation="0">
       <div class="d-flex w-100 justify-space-between align-center">
         <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-        <div class="d-flex">
+        <div class="d-flex cursor-pointer" @click="navigateTo('/')">
             <img src="~/assets/img/logoku.png" width="50px">
             <h2 class="font-bold align-center d-flex ml-2">Moreview</h2>
         </div>

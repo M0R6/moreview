@@ -10,6 +10,7 @@ export default defineEventHandler(async (event) => {
            genre: true,
          },
        },
+       comments: true
      },
      take: 25,
    });

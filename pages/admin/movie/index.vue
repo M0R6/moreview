@@ -171,7 +171,7 @@ const addMovie = async () => {
         description: description.value,
         poster: posterBase64,
         trailer: trailerBase64,
-        trailerUrl: trailer.value,
+        trailerUrl: trailerUrl.value,
         release_year: parseInt(releaseYear.value),
         duration: parseInt(duration.value),
         episode: parseInt(episode.value),
@@ -385,10 +385,103 @@ const viewMovie = (movie) => {
 
 const movieRate = (['G', 'PG', 'PG13', 'R', 'NC17']);
 const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
+
+const selectedFilms = ref([]);
+const bulkDeleteDialog = ref(false);
+const bulkArchiveDialog = ref(false);
+
+const deleteSelectedFilms = async () => {
+  if (selectedFilms.value.length === 0) {
+    showToast("No Genres selected", "warning");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/movie/delete/bulk", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ids: selectedFilms.value }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to delete films");
+    }
+
+    showToast("Films deleted successfully", "success");
+    selectedFilms.value = []; // Clear selection
+    bulkDeleteDialog.value = false;
+    fetchMovies(); // Refresh the list
+  } catch (error) {
+    console.error("Error deleting films:", error);
+    showToast("Error deleting films", "error");
+  }
+};
+
+const archiveSelectedFilms = async () => {
+  if (selectedFilms.value.length === 0) {
+    showToast("No films selected", "warning");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/movie/archive/bulk", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ids: selectedFilms.value }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to archive films");
+    }
+
+    showToast("Films archived successfully", "success");
+    selectedFilms.value = []; // Clear selection
+    bulkArchiveDialog.value = false;
+    fetchMovies(); // Refresh the list
+  } catch (error) {
+    console.error("Error archiving films:", error);
+    showToast("Error archiiving films", "error");
+  }
+};
 </script>
 
 <template>
   <v-container v-if="isAdmin">
+
+    <v-dialog v-model="bulkDeleteDialog">
+         <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+         <v-card-title>Are you sure?</v-card-title>
+         <v-card-text>
+            Are you sure you want to delete <strong>{{ selectedFilms.length }}</strong> selected items?
+         </v-card-text>
+         <v-card-actions>
+            <v-btn color="error" @click="deleteSelectedFilms">Yes</v-btn>
+            <v-btn @click="bulkDeleteDialog = false">No</v-btn>
+         </v-card-actions>
+         </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="bulkArchiveDialog">
+         <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+         <v-card-title>Are you sure?</v-card-title>
+         <v-card-text>
+            Are you sure you want to archive <strong>{{ selectedFilms.length }}</strong> selected items?
+         </v-card-text>
+         <v-card-actions>
+            <v-btn color="secondary" @click="archiveSelectedFilms">Yes</v-btn>
+            <v-btn @click="bulkArchiveDialog = false">No</v-btn>
+         </v-card-actions>
+         </v-card>
+      </v-dialog>
+
     <v-dialog v-model="uploadLoading">
       <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
         <v-card-title class="d-flex align-center">
@@ -661,6 +754,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
             <v-file-input
               v-if="uploadTrailer"
               @input="handleTrailerInput"
+              v-model="trailer"
               label="Trailer (File)"
               accept="video/*"
               variant="outlined"
@@ -690,7 +784,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
     </v-dialog>
 
     <!-- Movie Table -->
-    <v-card elevation="4">
+    <v-card elevation="4" :color="theme.global.name.value === 'customLight' ? 'transparent' : null">
       <v-card-title class="d-flex justify-space-between flex-wrap">
         <div class="d-flex flex-wrap">
           <div class="d-flex align-center" width="100%">
@@ -706,6 +800,25 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
           </div>
         </div>
         <div>
+          <v-btn 
+             color="secondary" 
+             class="mt-3" 
+             :disabled="selectedFilms.length === 0"
+             v-if="selectedFilms.length > 0"
+             @click="bulkArchiveDialog = true"
+          >
+             <v-icon left>mdi-archive</v-icon> Archive Selected ({{ selectedFilms.length }})
+          </v-btn>
+          <br>
+          <v-btn 
+             color="error" 
+             class="mt-3" 
+             :disabled="selectedFilms.length === 0"
+             v-if="selectedFilms.length > 0"
+             @click="bulkDeleteDialog = true"
+          >
+             <v-icon left>mdi-delete</v-icon> Delete Selected ({{ selectedFilms.length }})
+          </v-btn>
           <v-text-field
             :loading="loading"
             append-inner-icon="mdi-magnify"
@@ -722,7 +835,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
         </div>
       </v-card-title>
       <v-data-table
-        color="white  "
+        :style="{ backgroundColor: theme.global.name.value === 'customLight' ? 'white' : null }"
         :headers="[
           { title: 'No.', align: 'start', sortable: false, key: 'index' },
           { title: 'Title', align: 'start', sortable: true, key: 'title' },
@@ -783,6 +896,8 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
         :items="movies"
         :loading="loading"
         :items-per-page="10"
+        v-model="selectedFilms"
+        show-select
       >
         <!-- Row Numbering -->
         <template v-slot:item.index="{ index }">
@@ -814,7 +929,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
           {{ formatDate(item.updated_at) }}
         </template>
         <template v-slot:item.archived_at="{ item }">
-          {{ item.archived_at ? formatDate(item.archived_at) : "-" }}
+          <span :class="item.archived_at ? 'text-error' : null">{{ item.archived_at ? formatDate(item.archived_at) : "-" }}</span>
         </template>
 
         <!-- Actions Column -->
@@ -827,6 +942,9 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
             </template>
             <v-btn class="ma-1" icon @click="viewMovie(item)">
               <v-icon>mdi-eye</v-icon>
+            </v-btn>
+            <v-btn class="ma-1" icon @click="navigateTo(`/admin/movie/cast/relation/${item.id}`)">
+              <v-icon>mdi-relation-one-to-many</v-icon>
             </v-btn>
             <v-btn class="ma-1" icon @click="editMovie(item)">
               <v-icon>mdi-pencil</v-icon>
@@ -936,7 +1054,7 @@ const seriesRate = (['TVY', 'TVY7', 'TVG', 'TVPG', 'TV14', 'TVMA']);
             ></v-text-field>
             <v-select
               v-model="rating"
-              :items="['G', 'PG', 'PG13', 'R', 'NC17']"
+              :items="movieType === 'movie' ? movieRate : seriesRate"
               label="Rating"
               required
               variant="outlined"

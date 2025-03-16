@@ -47,7 +47,7 @@ model Film {
   updated_at        DateTime
 
   // Relations
-  createdBy         users     @relation(fields: [postedBy], references: [id])
+  createdBy         users     @relation(fields: [postedBy], references: [id], onDelete: Cascade)
   genres_relations  GenreRelation[]
   comments          Comment[]
   film_casts        FilmCast[]
@@ -63,7 +63,7 @@ model Cast {
 
   // Relations
   film_casts        FilmCast[]
-  created_by        users     @relation(fields: [createdBy], references: [id])
+  created_by        users     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
 }
 
 model FilmCast {
@@ -78,7 +78,7 @@ model FilmCast {
   // Relations
   film              Film      @relation(fields: [film_id], references: [id], onDelete: Cascade)
   cast              Cast      @relation(fields: [cast_id], references: [id], onDelete: Cascade)
-  created_by        users     @relation(fields: [createdBy], references: [id])
+  created_by        users     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
 }
 
 

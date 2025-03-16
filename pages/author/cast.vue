@@ -216,7 +216,7 @@ onMounted(async () => {
         </v-card-text>
       </v-card>
     </v-dialog>
-    <v-card elevation="4">
+    <v-card elevation="4" :color="theme.global.name.value === 'customLight' ? 'white' : null">
       <v-card-title class="d-flex justify-space-between flex-wrap">
         <div class="d-flex flex-wrap">
           <div class="d-flex align-center" width="100%">
@@ -248,7 +248,7 @@ onMounted(async () => {
         </div>
       </v-card-title>
       <v-data-table
-        style="background-color: transparent"
+        :style="{ backgroundColor: theme.global.name.value === 'customLight' ? 'white' : null }"
         :headers="[
           { title: 'No.', align: 'start', sortable: false, key: 'index' },
           { title: 'Name', align: 'start', sortable: true, key: 'name' },

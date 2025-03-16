@@ -82,6 +82,7 @@ export default defineEventHandler(async (event) => {
           genre: true,
         },
       },
+      comments: true,
     },
     take: 10, // Optional: limits the number of results
   });

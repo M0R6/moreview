@@ -86,7 +86,7 @@ const updateUser = async () => {
 
   showToast(data.value.message, "success");
   editItemDialog.value = false;
-  fetchMovies();
+  window.location.reload();
 };
 
 // Check access on mounted

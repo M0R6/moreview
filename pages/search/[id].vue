@@ -3,31 +3,52 @@
     <v-row>
       <v-col cols="12">
         <v-card elevation="0" color="transparent">
-          <!-- <div class="d-flex justify-space-around">
-            <v-card-title class="text-center my-auto">Watch</v-card-title>
-            <v-img v-if="randomMovie" :src="randomMovie.poster" height="300px"></v-img>
-            <v-card-title class="text-center my-auto">Now!</v-card-title>
-          </div>
-          <v-card-title v-if="randomMovie" class="text-center">{{ randomMovie.title }}</v-card-title> -->
-          <!-- <v-form class="flex-wrap d-flex justify-space-between align-center">
-            <v-card-title class="text-center my-auto text-wrap">Search for movie reviews now!</v-card-title>
-            <v-text-field class="my-auto pa-4" hide-details variant="outlined" rounded="lg" max-width="300px" width="100%" label="Search" v-model="search" append-inner-icon="mdi-magnify"></v-text-field>
-          </v-form> -->
-          <v-card-title v-if="movies.length > 0" class="font-bold text-h4">
-            Here are the results for "{{ route.params.id }}":
+          <v-card-title v-if="movies.length > 0" class="font-bold text-h4 text-wrap">
+            Here are the results for <span class="text-red">{{ route.params.id }}</span>:
           </v-card-title>
-          <v-card-title v-else class="font-bold justify-center d-flex my-auto align-center text-h4">
-            Sorry, there are no results for "{{ route.params.id }}"
+          <v-card-title v-else class="font-bold text-h4 text-wrap">
+            Sorry, there's no results for <span class="text-red">{{ route.params.id }}</span>
           </v-card-title>
         </v-card>
       </v-col>
     </v-row>
     <v-row>
-      <v-col v-for="movie in movies" :key="movie.id" cols="12" sm="6" md="4" lg="3">
-        <v-card @click="navigateTo(`/movie/${movie.id}`)" color="transparent">
-          <v-card-title class="text-truncate text-center">{{ movie.title }}</v-card-title>
-          <v-img :src="movie.poster" max-height="350px" height="100%"></v-img>
-          <v-card-text class="text-truncate">{{ movie.description }}</v-card-text>
+      <v-col
+        v-for="movie in movies"
+        :key="movie.id"
+        cols="12"
+        sm="6"
+        md="4"
+        lg="3"
+      >
+        <v-card @click="navigateItem(movie)" :color="theme.global.name.value === 'customLight' ? 'transparent' : null">
+          <v-card-title class="d-flex justify-center align-center">
+            <span class="text-truncate text-center">{{ movie.title }}</span>
+          </v-card-title>
+
+          <v-card-text class="d-flex justify-center align-center">
+            <v-chip-group class="d-flex justify-space-between" @click.stop>
+              <!-- <v-chip>{{ movie.typeMov === "movie" ? movie.duration + ' mins' : movie.episode }}</v-chip> -->
+              <v-chip>{{ movie.release_year }}</v-chip>
+              <v-chip>{{ 
+                    movie.rating === "PG13"
+                    ? "PG-13"
+                    : movie.rating === "NC17"
+                    ? "NC-17"
+                    : movie.rating
+              }}</v-chip>
+                <v-chip class="d-flex align-center justify-center">
+                  <v-icon class="mr-1">mdi-star</v-icon>
+                  <span class="align-end">{{ (movie.comments.reduce((acc, comment) => acc + comment.rating, 0) / movie.comments.length).toFixed(1) }}</span>
+                </v-chip>
+            </v-chip-group>
+          </v-card-text>
+          <v-img
+            v-if="movie.poster"
+            :src="movie.poster"
+            max-height="350px"
+            height="100%"
+          ></v-img>
         </v-card>
       </v-col>
     </v-row>
@@ -51,11 +72,20 @@ definePageMeta({
   },
 });
 
+const navigateItem = (item) => {
+  if (item.typeMov === "movie") {
+    navigateTo(`/movie/${item.id}`);
+  } else {
+    navigateTo(`/series/${item.id}`);
+  }
+};
+
 const route = useRoute();
 const id = ref(route.params.id);
 const movies = ref([]);
 const randomMovie = ref(null);
 const showToast = inject("showToast");
+const theme = inject("theme");
 
 const getMovies = async () => {
   try {

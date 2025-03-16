@@ -9,20 +9,34 @@
         md="4"
         lg="3"
       >
-        <v-card color="transparent" @click="navigateTo(`/movie/${movie.id}`)">
+        <v-card @click="navigateTo(`/movie/${movie.id}`)" :color="theme.global.name.value === 'customLight' ? 'transparent' : null">
           <v-card-title class="d-flex justify-center align-center">
             <span class="text-truncate text-center">{{ movie.title }}</span>
           </v-card-title>
+
+          <v-card-text class="d-flex justify-center align-center">
+            <v-chip-group class="d-flex justify-space-between" @click.stop>
+              <!-- <v-chip>{{ movie.typeMov === "movie" ? movie.duration + ' mins' : movie.episode }}</v-chip> -->
+              <v-chip>{{ movie.release_year }}</v-chip>
+              <v-chip>{{ 
+                    movie.rating === "PG13"
+                    ? "PG-13"
+                    : movie.rating === "NC17"
+                    ? "NC-17"
+                    : movie.rating
+              }}</v-chip>
+                <v-chip class="d-flex align-center justify-center">
+                  <v-icon class="mr-1">mdi-star</v-icon>
+                  <span class="align-end">{{ (movie.comments.reduce((acc, comment) => acc + comment.rating, 0) / movie.comments.length).toFixed(1) }}</span>
+                </v-chip>
+            </v-chip-group>
+          </v-card-text>
           <v-img
             v-if="movie.poster"
             :src="movie.poster"
-            height="400"
-            width="300"
-            cover
+            max-height="350px"
+            height="100%"
           ></v-img>
-          <v-card-text class="text-truncate">{{
-            movie.description
-          }}</v-card-text>
         </v-card>
       </v-col>
     </v-row>
@@ -31,7 +45,9 @@
 
 <script setup>
 import { useHead } from "#imports";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
+
+const theme = inject("theme");
 
 useHead({
   title: "Dashboard - Moreview",

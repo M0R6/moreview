@@ -25,6 +25,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  if (!body.rating) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Rating is required",
+    })
+  }
+
   await prisma.comment.create({
     data: {
       user_id: body.user_id,

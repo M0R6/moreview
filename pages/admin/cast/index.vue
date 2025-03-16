@@ -43,6 +43,7 @@ const getAuthUser = async () => {
 };
 
 const showToast = inject("showToast");
+const theme = inject("theme");
 const name = ref("");
 const photo = ref(null);
 const form = ref(false);
@@ -61,7 +62,7 @@ const addCast = async () => {
   try {
     addItem.value = false;
     uploadLoading.value = true;
-    const photoBase64 = photo.value ? await convertFileToBase64(photo.value) : null;
+    const photoBase64 = photo.value instanceof Blob ? await convertFileToBase64(photo.value) : null;
 
     const { data, error } = await useFetch(`/api/cast/add`, {
       method: "POST",
@@ -140,8 +141,14 @@ const editItem = (item) => {
 
 // Function to send the update request to the backend
 const updateCast = async () => {
+  let photoBase64 = null;
 
-  const photoBase64 = editPhoto.value ? await convertFileToBase64(editPhoto.value) : null;
+  // Check if a new file is selected, otherwise keep the old photo
+  if (editPhoto.value instanceof File) {
+    photoBase64 = await convertFileToBase64(editPhoto.value);
+  } else {
+    photoBase64 = null; // Keep the existing photo URL
+  }
 
   try {
     const { data, error } = await useFetch(`/api/cast/update/${editId.value}`, {
@@ -201,6 +208,40 @@ const fetchCasts = async () => {
   }
 };
 
+const selectedCasts = ref([]);
+const bulkDeleteDialog = ref(false);
+
+const deleteSelectedCasts = async () => {
+  if (selectedCasts.value.length === 0) {
+    showToast("No casts selected", "warning");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/cast/delete/bulk", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ids: selectedCasts.value }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to delete casts");
+    }
+
+    showToast("Casts deleted successfully", "success");
+    selectedCasts.value = []; // Clear selection
+    bulkDeleteDialog.value = false;
+    fetchCasts(); // Refresh the list
+  } catch (error) {
+    console.error("Error deleting casts:", error);
+    showToast("Error deleting casts", "error");
+  }
+};
+
 onMounted(() => {
   fetchCasts();
   getAuthUser();
@@ -208,6 +249,62 @@ onMounted(() => {
 </script>
 <template>
   <v-container v-if="isAdmin">
+
+    <v-dialog v-model="areYouSure">
+      <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+        <v-card-title class="d-flex align-center">
+          <v-icon class="mr-2">mdi-alert</v-icon>
+          <h2 class="text-wrap">Are you sure?</h2>
+        </v-card-title>
+        <v-card-text class="pt-0">
+          <p>Are you sure you want to delete <span class="font-weight-bold">{{ selectedCast.name }}</span>?
+          </p>
+          <div class="mt-3">
+            <v-btn class="mr-3" color="error" @click="deleteCast(selectedCast.id)">Yes</v-btn>
+            <v-btn @click="areYouSure = false">No</v-btn>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="editItemDialog">
+      <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+        <v-card-title class="d-flex align-center">
+          <v-icon class="mr-2">mdi-pencil</v-icon>
+          <h2 class="text-wrap">Edit Cast</h2>
+        </v-card-title>
+        <v-card-text>
+          <v-form v-model="editForm" @submit.prevent="updateCast">
+            <v-text-field v-model="editName" label="Title" required variant="outlined"></v-text-field>
+            <div class="mb-5">
+              <v-avatar v-if="editPhoto !== null" class="">
+                <v-img :src="editPhoto" />
+              </v-avatar>
+                <v-btn class="ma-1" icon @click="changePicture = !changePicture" color="primary">
+                <v-icon v-if="editPhoto === null">mdi-image-plus-outline</v-icon>
+                <v-icon v-else>mdi-image-edit-outline</v-icon>
+              </v-btn>
+            </div>
+            <v-file-input v-if="changePicture" variant="outlined" v-model="editPhoto" label="Profile Picture"
+              accept="image/*"></v-file-input>
+            <v-btn type="submit" color="primary">Update Cast</v-btn>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="bulkDeleteDialog">
+      <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
+        <v-card-title>Are you sure?</v-card-title>
+        <v-card-text>
+          Are you sure you want to delete <strong>{{ selectedCasts.length }}</strong> selected items?
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="error" @click="deleteSelectedCasts">Yes</v-btn>
+          <v-btn @click="bulkDeleteDialog = false">No</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="uploadLoading">
       <v-card width="100%" max-width="500px" class="d-flex mx-auto my-auto">
         <v-card-title class="d-flex align-center">
@@ -215,10 +312,7 @@ onMounted(() => {
           <h2 class="text-wrap">Uploading</h2>
         </v-card-title>
         <v-card-text>
-          <v-progress-linear
-            indeterminate
-            color="primary"
-          ></v-progress-linear>
+          <v-progress-linear indeterminate color="primary"></v-progress-linear>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -230,25 +324,15 @@ onMounted(() => {
         </v-card-title>
         <v-card-text>
           <v-form v-model="form" @submit.prevent="addCast">
-            <v-text-field
-              v-model="name"
-              label="Cast Name"
-              required
-              variant="outlined"
-            ></v-text-field>
-            <v-file-input
-              variant="outlined"
-              v-model="photo"
-              label="Profile Picture"
-              accept="image/*"
-            ></v-file-input>
+            <v-text-field v-model="name" label="Cast Name" required variant="outlined"></v-text-field>
+            <v-file-input variant="outlined" v-model="photo" label="Profile Picture" accept="image/*"></v-file-input>
             <v-btn @click="addItem = false">Cancel</v-btn>
             <v-btn type="submit" color="primary">Add Cast</v-btn>
           </v-form>
         </v-card-text>
       </v-card>
     </v-dialog>
-    <v-card elevation="4">
+    <v-card elevation="4" :color="theme.global.name.value === 'customLight' ? 'white' : null">
       <v-card-title class="d-flex justify-space-between flex-wrap">
         <div class="d-flex flex-wrap">
           <div class="d-flex align-center" width="100%">
@@ -256,32 +340,20 @@ onMounted(() => {
             <v-chip color="primary">{{ casts.length }}</v-chip>
           </div>
           <div class="align-center d-flex mt-2 mt-md-0 ml-0 ml-md-5">
-            <v-btn
-              color="primary"
-              @click="addItem = true"
-              icon="mdi-plus"
-            ></v-btn>
+            <v-btn color="primary" @click="addItem = true" icon="mdi-plus"></v-btn>
           </div>
         </div>
         <div>
-          <v-text-field
-            :loading="loading"
-            append-inner-icon="mdi-magnify"
-            density="compact"
-            label="Search"
-            placeholder="Search"
-            variant="outlined"
-            width="300"
-            class="my-2"
-            hide-details
-            v-model="search"
-            single-line
-          ></v-text-field>
+          <v-btn color="error" class="mt-3" :disabled="selectedCasts.length === 0" v-if="selectedCasts.length > 0"
+            @click="bulkDeleteDialog = true">
+            <v-icon left>mdi-delete</v-icon> Delete Selected ({{ selectedCasts.length }})
+          </v-btn>
+          <v-text-field :loading="loading" append-inner-icon="mdi-magnify" density="compact" label="Search"
+            placeholder="Search" variant="outlined" width="300" class="my-2" hide-details v-model="search"
+            single-line></v-text-field>
         </div>
       </v-card-title>
-      <v-data-table
-        style="background-color: transparent"
-        :headers="[
+      <v-data-table :style="{ backgroundColor: theme.global.name.value === 'customLight' ? 'white' : null }" :headers="[
           { title: 'No.', align: 'start', sortable: false, key: 'index' },
           { title: 'Name', align: 'start', sortable: true, key: 'name' },
           {
@@ -303,11 +375,7 @@ onMounted(() => {
             key: 'created_by.name',
           },
           { title: 'Actions', align: 'start', sortable: false, key: 'actions' },
-        ]"
-        :search="search"
-        :items="casts"
-        :loading="loading"
-      >
+        ]" :search="search" :items="casts" :loading="loading" v-model="selectedCasts" show-select>
         <!-- Row Numbering -->
         <template v-slot:item.index="{ index }">
           {{ index + 1 }}
@@ -318,13 +386,13 @@ onMounted(() => {
           </v-avatar>
           <v-avatar color="secondary" v-else>
             {{
-              item.name &&
-              item.name.split(" ").length > 1
-                ? item.name.split(" ")[0].charAt(0) +
-                  item.name.split(" ").slice(-1)[0].charAt(0)
-                : item.name
-                ? item.name.charAt(0)
-                : ""
+            item.name &&
+            item.name.split(" ").length > 1
+            ? item.name.split(" ")[0].charAt(0) +
+            item.name.split(" ").slice(-1)[0].charAt(0)
+            : item.name
+            ? item.name.charAt(0)
+            : ""
             }}
           </v-avatar>
           <span class="ml-3">{{ item.name }}</span>
@@ -341,85 +409,19 @@ onMounted(() => {
         </template> -->
         <!-- Actions Column -->
         <template v-slot:item.actions="{ item }">
-          <v-btn class="ma-1" icon @click="editItem(item)">
-            <v-icon>mdi-pencil</v-icon>
-            <v-dialog v-model="editItemDialog">
-              <v-card
-                width="100%"
-                max-width="500px"
-                class="d-flex mx-auto my-auto"
-              >
-                <v-card-title class="d-flex align-center">
-                  <v-icon class="mr-2">mdi-pencil</v-icon>
-                  <h2 class="text-wrap">Edit Cast</h2>
-                </v-card-title>
-                <v-card-text>
-                  <v-form v-model="editForm" @submit.prevent="updateCast">
-                    <v-text-field
-                      v-model="editName"
-                      label="Title"
-                      required
-                      variant="outlined"
-                    ></v-text-field>
-                    <div class="mb-5">
-                      <v-avatar v-if="editPhoto !== null" class="">
-                        <v-img :src="editPhoto" />
-                      </v-avatar>
-                      <v-btn
-                        class="ma-1"
-                        icon
-                        @click="changePicture = true"
-                        color="primary"
-                      >
-                        <v-icon v-if="editPhoto === null">mdi-image-plus-outline</v-icon>
-                        <v-icon v-else>mdi-image-edit-outline</v-icon>
-                      </v-btn>
-                    </div>
-                      <v-file-input
-                        v-if="changePicture"
-                        variant="outlined"
-                        v-model="editPhoto"
-                        label="Profile Picture"
-                        accept="image/*"
-                      ></v-file-input>
-                    <v-btn type="submit" color="primary">Update Cast</v-btn>
-                  </v-form>
-                </v-card-text>
-              </v-card>
-            </v-dialog>
-          </v-btn>
-          <v-btn
-            class="ma-1"
-            icon
-            @click="areYouSure = true; selectedCast = item;"
-            color="error"
-          >
-            <v-icon>mdi-delete</v-icon>
-            <v-dialog v-model="areYouSure">
-              <v-card 
-                width="100%"
-                max-width="500px"
-                class="d-flex mx-auto my-auto"
-              >
-                <v-card-title class="d-flex align-center">
-                  <v-icon class="mr-2">mdi-alert</v-icon>
-                  <h2 class="text-wrap">Are you sure?</h2>
-                </v-card-title>
-                <v-card-text class="pt-0">
-                  <p>Are you sure you want to delete <span class="font-weight-bold">{{ selectedCast.name }}</span>?</p>
-                  <div class="mt-3">
-                    <v-btn
-                      class="mr-3"
-                      color="error"
-                      @click="deleteCast(selectedCast.id)"
-                      >Yes</v-btn
-                    >
-                    <v-btn @click="areYouSure = false">No</v-btn>
-                  </div>
-                </v-card-text>
-              </v-card>
-            </v-dialog>
-          </v-btn>
+          <v-menu location="start" offset-y>
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" icon>
+                <v-icon>mdi-dots-vertical</v-icon>
+              </v-btn>
+            </template>
+            <v-btn class="ma-1" icon @click="editItem(item)">
+              <v-icon>mdi-pencil</v-icon>
+            </v-btn>
+            <v-btn class="ma-1" icon @click="areYouSure = true; selectedCast = item;" color="error">
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </v-menu>
         </template>
       </v-data-table>
     </v-card>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import { useHead } from "#imports";
 
 useHead({
@@ -10,6 +10,7 @@ useHead({
   ],
 });
 
+const theme = inject("theme");
 const { $moment } = useNuxtApp();
 const { data } = useAuth();
 const userA = ref(null);
@@ -664,7 +665,7 @@ const viewMovie = (movie) => {
     </v-dialog>
 
     <!-- Movie Table -->
-    <v-card elevation="4">
+    <v-card elevation="4" :color="theme.global.name.value === 'customLight' ? 'white' : null">
       <v-card-title class="d-flex justify-space-between flex-wrap">
         <div class="d-flex flex-wrap">
           <div class="d-flex align-center" width="100%">
@@ -696,7 +697,7 @@ const viewMovie = (movie) => {
         </div>
       </v-card-title>
       <v-data-table
-        style="background-color: transparent"
+        :style="{ backgroundColor: theme.global.name.value === 'customLight' ? 'white' : null }"
         :headers="[
           { title: 'No.', align: 'start', sortable: false, key: 'index' },
           { title: 'Title', align: 'start', sortable: true, key: 'title' },
@@ -784,6 +785,9 @@ const viewMovie = (movie) => {
             </template>
             <v-btn class="ma-1" icon @click="viewMovie(item)">
               <v-icon>mdi-eye</v-icon>
+            </v-btn>
+            <v-btn class="ma-1" icon @click="navigateTo(`/author/movie/cast/relation/${item.id}`)">
+              <v-icon>mdi-relation-one-to-many</v-icon>
             </v-btn>
             <v-btn class="ma-1" icon @click="editMovie(item)">
               <v-icon>mdi-pencil</v-icon>
