@@ -12,7 +12,8 @@ title: 'Login - Moreview',
 
 const { signIn } = useAuth()
 const showToast = inject('showToast')
-const toggleTheme = inject('toggleTheme')
+const theme = inject('theme')
+const showPassword = ref(false)
 
 definePageMeta({
   layout: "auth",
@@ -74,11 +75,17 @@ const login = async (email, password) => {
 
                 <v-text-field
                   variant="outlined"
-                  type="password"
+                  :type="showPassword ? 'text' : 'password'"
                   v-model="password"
                   label="Password"
                   :rules="passwordRules"
-                ></v-text-field>
+                >
+                  <template #append-inner>
+                    <v-icon class="cursor-pointer" @click="showPassword = !showPassword">
+                      {{ showPassword ? 'mdi-eye-off' : 'mdi-eye' }}
+                    </v-icon>
+                  </template>
+                </v-text-field>
 
                 <v-btn :disabled="!form" type="submit" color="primary" block="" class="d-flex mx-auto mt-2">
                   Sign In

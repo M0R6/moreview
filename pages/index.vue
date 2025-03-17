@@ -3,24 +3,14 @@
     <v-row>
       <v-col cols="12">
         <v-card :color="theme.global.name.value === 'customLight' ? 'transparent' : null" class="py-4">
-          <v-card-title
-            class="pt-0 text-center text-wrap my-auto text-h5 font-weight-bold"
-            >Recently added on Moreview</v-card-title
-          >
+          <v-card-title class="pt-0 text-center text-wrap my-auto text-h5 font-weight-bold">Recently added on
+            Moreview</v-card-title>
           <div class="d-flex justify-space-around">
             <!-- <v-card-title class="text-center my-auto">Just<br>added</v-card-title> -->
             <v-slide-group center-active show-arrows>
-              <v-slide-group-item
-                v-for="(latest, index) in latestMovie"
-                :key="index"
-              >
-                <img
-                  @click="navigateItem(latest)"
-                  :src="latest.poster"
-                  alt="Latest movie poster"
-                  height="300px"
-                  class="ma-3 cursor-pointer"
-                />
+              <v-slide-group-item v-for="(latest, index) in latestMovie" :key="index">
+                <img @click="navigateItem(latest)" :src="latest.poster" alt="Latest movie poster" height="300px"
+                  class="ma-3 cursor-pointer" />
               </v-slide-group-item>
             </v-slide-group>
           </div>
@@ -28,103 +18,382 @@
       </v-col>
     </v-row>
 
-    <v-row>
-      <v-card-title width="100" class="pt-0 text-center text-wrap mx-auto my-auto text-h5 font-weight-bold">
-        Most popular
-      </v-card-title>
-      <v-col
-        v-for="movie in mostPopular"
-        :key="movie.id"
-        cols="12"
-        sm="6"
-        md="4"
-        lg="3"
-      >
-        <v-card @click="navigateItem(movie)" :color="theme.global.name.value === 'customLight' ? 'transparent' : null">
-          <v-card-title class="d-flex justify-center align-center">
-            <span class="text-truncate text-center">{{ movie.title }}</span>
-          </v-card-title>
+    <v-row class="my-4">
+      <v-col>
+        <v-card-title 
+          class="pt-0 text-center text-h5 font-weight-bold primary--text mb-4"
+        >
+          Most Popular
+        </v-card-title>
 
-          <v-card-text class="d-flex justify-center align-center">
-            <v-chip-group class="d-flex justify-space-between" @click.stop>
-              <!-- <v-chip>{{ movie.typeMov === "movie" ? movie.duration + ' mins' : movie.episode }}</v-chip> -->
-              <v-chip>{{ movie.release_year }}</v-chip>
-              <v-chip>{{ 
-                    movie.rating === "PG13"
-                    ? "PG-13"
-                    : movie.rating === "NC17"
-                    ? "NC-17"
-                    : movie.rating
-              }}</v-chip>
-                <v-chip class="d-flex align-center justify-center">
-                  <v-icon class="mr-1">mdi-star</v-icon>
-                  <span class="align-end">{{ (movie.comments.reduce((acc, comment) => acc + comment.rating, 0) / movie.comments.length).toFixed(1) }}</span>
-                </v-chip>
-            </v-chip-group>
-          </v-card-text>
-          <v-img
-            v-if="movie.poster"
-            :src="movie.poster"
-            max-height="350px"
-            height="100%"
-          ></v-img>
-        </v-card>
+        <v-slide-group 
+          show-arrows
+          class="pa-2"
+        >
+          <v-slide-group-item 
+            v-for="movie in mostPopular" 
+            :key="movie.id"
+            v-slot="{ isSelected }"
+          >
+            <v-card
+              @click="navigateItem(movie)"
+              :elevation="isSelected ? 6 : 2"
+              :class="isSelected ? 'mx-2' : 'mx-1'"
+              class="my-2 transition-swing movie-card"
+              width="220"
+              height="420"
+              :color="theme.global.name.value === 'customLight' ? 'white' : null"
+              hover
+            >
+              <v-img 
+                v-if="movie.poster" 
+                :src="movie.poster" 
+                height="280"
+                cover
+                class="rounded-t"
+              >
+                <template v-slot:placeholder>
+                  <v-row class="fill-height ma-0" align="center" justify="center">
+                    <v-progress-circular indeterminate color="primary"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
+            
+              <v-card-title class="d-flex justify-center align-center px-3 pt-3 pb-0 text-subtitle-1">
+                <span class="text-truncate text-center font-weight-medium">{{ movie.title }}</span>
+              </v-card-title>
+            
+              <v-card-text class="px-3 pt-1 pb-2">
+                <v-chip-group 
+                  class="d-flex justify-space-between flex-wrap" 
+                  @click.stop
+                >
+                  <v-chip
+                    size="small"
+                    class="ma-1"
+                    color="primary"
+                    variant="outlined"
+                  >
+                    {{ movie.release_year }}
+                  </v-chip>
+
+                  <v-chip
+                    size="small"
+                    class="ma-1"
+                    color="secondary"
+                    variant="outlined"
+                  >
+                    {{
+                      movie.rating === "PG13"
+                      ? "PG-13"
+                      : movie.rating === "NC17"
+                      ? "NC-17"
+                      : movie.rating
+                    }}
+                  </v-chip>
+
+                  <v-chip
+                    size="small"
+                    class="ma-1"
+                    color="warning"
+                    variant="flat"
+                  >
+                    <v-icon size="small" class="mr-1">mdi-star</v-icon>
+                    <span>{{ (movie.comments.reduce((acc, comment) => acc + comment.rating, 0) / 
+                      movie.comments.length).toFixed(1) }}</span>
+                  </v-chip>
+                </v-chip-group>
+              </v-card-text>
+            </v-card>
+          </v-slide-group-item>
+        </v-slide-group>
       </v-col>
     </v-row>
 
-    <v-row>
-      <v-card-title width="100" class="pt-0 text-center mx-auto text-wrap my-auto text-h5 font-weight-bold">
-        Most liked 
-      </v-card-title>
-      <v-col
-        v-for="movie in mostLiked"
-        :key="movie.id"
-        cols="12"
-        sm="6"
-        md="4"
-        lg="3"
-        class="overflow-x-auto"
-      >
-        <v-card @click="navigateItem(movie)" :color="theme.global.name.value === 'customLight' ? 'transparent' : null">
-          <v-card-title class="d-flex justify-center align-center">
-            <span class="text-truncate text-center">{{ movie.title }}</span>
-          </v-card-title>
-
-          <v-card-text class="d-flex justify-center align-center">
-            <v-chip-group class="d-flex justify-space-between" @click.stop>
-              <!-- <v-chip>{{ movie.typeMov === "movie" ? movie.duration + ' mins' : movie.episode }}</v-chip> -->
-              <v-chip>{{ movie.release_year }}</v-chip>
-              <v-chip>{{ 
-                    movie.rating === "PG13"
-                    ? "PG-13"
-                    : movie.rating === "NC17"
-                    ? "NC-17"
-                    : movie.rating
-              }}</v-chip>
-                <v-chip class="d-flex align-center justify-center">
-                  <v-icon class="mr-1">mdi-star</v-icon>
-                  <span class="align-end">{{ (movie.comments.reduce((acc, comment) => acc + comment.rating, 0) / movie.comments.length).toFixed(1) }}</span>
-                </v-chip>
-            </v-chip-group>
-          </v-card-text>
-          <v-img
-            v-if="movie.poster"
-            :src="movie.poster"
-            max-height="350px"
-            height="100%"
-          ></v-img>
-        </v-card>
+    <v-row class="my-4">
+      <v-col>
+        <v-card-title 
+          class="pt-0 text-center text-h5 font-weight-bold primary--text mb-4"
+        >
+          Highest Rated
+        </v-card-title>
+        
+        <v-slide-group 
+          show-arrows
+          class="pa-2"
+        >
+          <v-slide-group-item 
+            v-for="movie in mostLiked" 
+            :key="movie.id"
+            v-slot="{ isSelected }"
+          >
+            <v-card
+              @click="navigateItem(movie)"
+              :elevation="isSelected ? 6 : 2"
+              :class="isSelected ? 'mx-2' : 'mx-1'"
+              class="my-2 transition-swing movie-card"
+              width="220"
+              height="420"
+              :color="theme.global.name.value === 'customLight' ? 'white' : null"
+              hover
+            >
+              <v-img 
+                v-if="movie.poster" 
+                :src="movie.poster" 
+                height="280"
+                cover
+                class="rounded-t"
+              >
+                <template v-slot:placeholder>
+                  <v-row class="fill-height ma-0" align="center" justify="center">
+                    <v-progress-circular indeterminate color="primary"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
+            
+              <v-card-title class="d-flex justify-center align-center px-3 pt-3 pb-0 text-subtitle-1">
+                <span class="text-truncate text-center font-weight-medium">{{ movie.title }}</span>
+              </v-card-title>
+            
+              <v-card-text class="px-3 pt-1 pb-2">
+                <v-chip-group 
+                  class="d-flex justify-space-between flex-wrap" 
+                  @click.stop
+                >
+                  <v-chip
+                    size="small"
+                    class="ma-1"
+                    color="primary"
+                    variant="outlined"
+                  >
+                    {{ movie.release_year }}
+                  </v-chip>
+                  
+                  <v-chip
+                    size="small"
+                    class="ma-1"
+                    color="secondary"
+                    variant="outlined"
+                  >
+                    {{
+                      movie.rating === "PG13"
+                      ? "PG-13"
+                      : movie.rating === "NC17"
+                      ? "NC-17"
+                      : movie.rating
+                    }}
+                  </v-chip>
+                  
+                  <v-chip
+                    size="small"
+                    class="ma-1"
+                    color="warning"
+                    variant="flat"
+                  >
+                    <v-icon size="small" class="mr-1">mdi-star</v-icon>
+                    <span>{{ (movie.comments.reduce((acc, comment) => acc + comment.rating, 0) / 
+                      movie.comments.length).toFixed(1) }}</span>
+                  </v-chip>
+                </v-chip-group>
+              </v-card-text>
+            </v-card>
+          </v-slide-group-item>
+        </v-slide-group>
       </v-col>
     </v-row>
+
+    <v-row class="my-4">
+      <v-col>
+        <v-card-title 
+          class="pt-0 text-center text-h5 font-weight-bold primary--text mb-4"
+        >
+          Popular Movies
+        </v-card-title>
+        
+        <v-slide-group 
+          show-arrows
+          class="pa-2"
+        >
+          <v-slide-group-item 
+            v-for="movie in movieOnly" 
+            :key="movie.id"
+            v-slot="{ isSelected }"
+          >
+            <v-card
+              @click="navigateItem(movie)"
+              :elevation="isSelected ? 6 : 2"
+              :class="isSelected ? 'mx-2' : 'mx-1'"
+              class="my-2 transition-swing movie-card"
+              width="220"
+              height="420"
+              :color="theme.global.name.value === 'customLight' ? 'white' : null"
+              hover
+            >
+              <v-img 
+                v-if="movie.poster" 
+                :src="movie.poster" 
+                height="280"
+                cover
+                class="rounded-t"
+              >
+                <template v-slot:placeholder>
+                  <v-row class="fill-height ma-0" align="center" justify="center">
+                    <v-progress-circular indeterminate color="primary"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
+            
+              <v-card-title class="d-flex justify-center align-center px-3 pt-3 pb-0 text-subtitle-1">
+                <span class="text-truncate text-center font-weight-medium">{{ movie.title }}</span>
+              </v-card-title>
+            
+              <v-card-text class="px-3 pt-1 pb-2">
+                <v-chip-group 
+                  class="d-flex justify-space-between flex-wrap" 
+                  @click.stop
+                >
+                  <v-chip
+                    size="small"
+                    class="ma-1"
+                    color="primary"
+                    variant="outlined"
+                  >
+                    {{ movie.release_year }}
+                  </v-chip>
+                  
+                  <v-chip
+                    size="small"
+                    class="ma-1"
+                    color="secondary"
+                    variant="outlined"
+                  >
+                    {{
+                      movie.rating === "PG13"
+                      ? "PG-13"
+                      : movie.rating === "NC17"
+                      ? "NC-17"
+                      : movie.rating
+                    }}
+                  </v-chip>
+                  
+                  <v-chip
+                    size="small"
+                    class="ma-1"
+                    color="warning"
+                    variant="flat"
+                  >
+                    <v-icon size="small" class="mr-1">mdi-star</v-icon>
+                    <span>{{ (movie.comments.reduce((acc, comment) => acc + comment.rating, 0) / 
+                      movie.comments.length).toFixed(1) }}</span>
+                  </v-chip>
+                </v-chip-group>
+              </v-card-text>
+            </v-card>
+          </v-slide-group-item>
+        </v-slide-group>
+      </v-col>
+    </v-row>
+
+    <v-row class="my-4">
+      <v-col>
+        <v-card-title 
+          class="pt-0 text-center text-h5 font-weight-bold primary--text mb-4"
+        >
+          Popular Series
+        </v-card-title>
+        
+        <v-slide-group 
+          show-arrows
+          class="pa-2"
+        >
+          <v-slide-group-item 
+            v-for="movie in seriesOnly" 
+            :key="movie.id"
+            v-slot="{ isSelected }"
+          >
+            <v-card
+              @click="navigateItem(movie)"
+              :elevation="isSelected ? 6 : 2"
+              :class="isSelected ? 'mx-2' : 'mx-1'"
+              class="my-2 transition-swing movie-card"
+              width="220"
+              height="420"
+              :color="theme.global.name.value === 'customLight' ? 'white' : null"
+              hover
+            >
+              <v-img 
+                v-if="movie.poster" 
+                :src="movie.poster" 
+                height="280"
+                cover
+                class="rounded-t"
+              >
+                <template v-slot:placeholder>
+                  <v-row class="fill-height ma-0" align="center" justify="center">
+                    <v-progress-circular indeterminate color="primary"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
+            
+              <v-card-title class="d-flex justify-center align-center px-3 pt-3 pb-0 text-subtitle-1">
+                <span class="text-truncate text-center font-weight-medium">{{ movie.title }}</span>
+              </v-card-title>
+            
+              <v-card-text class="px-3 pt-1 pb-2">
+                <v-chip-group 
+                  class="d-flex justify-space-between flex-wrap" 
+                  @click.stop
+                >
+                  <v-chip
+                    size="small"
+                    class="ma-1"
+                    color="primary"
+                    variant="outlined"
+                  >
+                    {{ movie.release_year }}
+                  </v-chip>
+                  
+                  <v-chip
+                    size="small"
+                    class="ma-1"
+                    color="secondary"
+                    variant="outlined"
+                  >
+                    {{
+                      movie.rating === "PG13"
+                      ? "PG-13"
+                      : movie.rating === "NC17"
+                      ? "NC-17"
+                      : movie.rating
+                    }}
+                  </v-chip>
+                  
+                  <v-chip
+                    size="small"
+                    class="ma-1"
+                    color="warning"
+                    variant="flat"
+                  >
+                    <v-icon size="small" class="mr-1">mdi-star</v-icon>
+                    <span>{{ (movie.comments.reduce((acc, comment) => acc + comment.rating, 0) / 
+                      movie.comments.length).toFixed(1) }}</span>
+                  </v-chip>
+                </v-chip-group>
+              </v-card-text>
+            </v-card>
+          </v-slide-group-item>
+        </v-slide-group>
+      </v-col>
+    </v-row>
+
   </v-container>
 </template>
 
 <script setup>
-import { useHead } from "#imports";
+import { useHead } from "#imports";   
 import { ref, onMounted, inject } from "vue";
 
 const theme = inject("theme");
-const toggleTheme = inject("toggleTheme");
 
 useHead({
   title: "Dashboard - Moreview",
@@ -152,6 +421,8 @@ const movies = ref([]);
 const latestMovie = ref([]);
 const mostPopular = ref([]);
 const mostLiked = ref([]);
+const movieOnly = ref([]);
+const seriesOnly = ref([]);
 
 const getMovies = async () => {
   try {
@@ -176,7 +447,19 @@ const getMovies = async () => {
           return bRating - aRating;
         })
         .slice(0, 10);
-        }
+      movieOnly.value = data.filter((item) => item.typeMov === "movie");
+      seriesOnly.value = data.filter((item) => item.typeMov === "series");
+      movieOnly.value.sort((a, b) => {
+        const aRating = a.comments.length > 0 ? a.comments.reduce((acc, comment) => acc + comment.rating, 0) / a.comments.length : 0;
+        const bRating = b.comments.length > 0 ? b.comments.reduce((acc, comment) => acc + comment.rating, 0) / b.comments.length : 0;
+        return bRating - aRating;
+      });
+      seriesOnly.value.sort((a, b) => {
+        const aRating = a.comments.length > 0 ? a.comments.reduce((acc, comment) => acc + comment.rating, 0) / a.comments.length : 0;
+        const bRating = b.comments.length > 0 ? b.comments.reduce((acc, comment) => acc + comment.rating, 0) / b.comments.length : 0;
+        return bRating - aRating;
+      });
+    }
   } catch (error) {
     console.error("Error fetching movies:", error);
   }

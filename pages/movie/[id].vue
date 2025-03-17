@@ -272,7 +272,7 @@
                       full-icon="mdi-heart"
                     >
                     </v-rating>
-                    <div v-if="data && comment.user.id === data.user.id || data && data.user.role === 'admin'">
+                    <div v-if="data && comment.user.id === data.user.id">
                       <v-icon class="cursor-pointer" @click="editComment(comment)">mdi-pencil</v-icon>
                       <v-icon class="cursor-pointer" @click="deleteDialog = true; idReview = comment.id">mdi-delete</v-icon>
                     </div>

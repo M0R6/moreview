@@ -24,7 +24,7 @@ definePageMeta({
 
 const name = ref("");
 const email = ref("");
-const photo = ref("");
+const photo = ref([]);
 const password = ref("");
 
 const form = ref(false);
@@ -85,6 +85,8 @@ const register = async () => {
         showToast("Failed to register. Please try again.", "error");
     }
 };
+
+const showPassword = ref(false);
 </script>
 
 <template>
@@ -138,9 +140,15 @@ const register = async () => {
                   variant="outlined"
                   v-model="password"
                   label="Password"
-                  type="password"
+                  :type="showPassword ? 'text' : 'password'"
                   :rules="passwordRules"
-                ></v-text-field>
+                >
+                  <template #append-inner>
+                    <v-icon class="cursor-pointer" @click="showPassword = !showPassword">
+                      {{ showPassword ? 'mdi-eye-off' : 'mdi-eye' }}
+                    </v-icon>
+                  </template>
+                </v-text-field>
                 <v-file-input
                   variant="outlined"
                   v-model="photo"
