@@ -761,11 +761,11 @@ const archiveSelectedFilms = async () => {
             ></v-file-input>
             <v-text-field
               v-if="embedTrailer"
-              v-model="trailer"
+              v-model="trailerUrl"
               label="Trailer URL"
               variant="outlined"
             ></v-text-field>
-            <v-select
+            <v-autocomplete
               v-model="genreIds"
               :items="sortedGenres"
               item-title="title"
@@ -773,7 +773,9 @@ const archiveSelectedFilms = async () => {
               label="Genres"
               multiple
               variant="outlined"
-            ></v-select>
+              chips
+              closable-chips
+            ></v-autocomplete>
             <v-btn type="submit" color="primary">Add Movie</v-btn>
             <v-btn @click="formNull" class="ml-2"
               >Cancel</v-btn

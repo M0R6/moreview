@@ -51,7 +51,7 @@ export default defineEventHandler(async (event) => {
   const film = await prisma.film.create({
     data: {
       title: body.title,
-      typeMov: body.movieType,
+      typeMov: body.typeMov,
       description: body.description,
       release_year: parseInt(body.release_year),
       duration: parseInt(body.duration) || null,

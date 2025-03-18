@@ -79,7 +79,7 @@
               color="info"
               variant="outlined"
               >
-              {{ movie.duration }} mins
+              {{ movie.episode }} eps
               </v-chip>
             </div>
           </v-card-text>

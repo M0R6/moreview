@@ -12,6 +12,7 @@ model users {
   name              String
   email             String    @unique
   password          String
+
   photo             String?
   role              Role
   deleted_at        DateTime?

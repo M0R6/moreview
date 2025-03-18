@@ -45,5 +45,5 @@ export default defineEventHandler(async (event) => {
 
   setResponseStatus(event, 201)
 
-  return { message: "Genre created" }
+  return { message: "Comment successfully created" }
 })

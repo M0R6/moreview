@@ -77,6 +77,9 @@
               >
                 {{ movie.title }}
               </v-card-title>
+              <v-card-title class="px-0 py-1 text-subtitle text-white font-weight-semibold">
+                Film created by: {{ movie.creator }}
+              </v-card-title>
               <v-card-subtitle class="px-0 text-white">
                 {{
                   movie.release_year + " • " + movie.duration + " mins" + " • "

@@ -154,6 +154,7 @@ const search = () => {
                 </template>
             </v-list-item>
             <v-card color="transparent" elevation="0" v-if="adminBar" class="align-center">
+                <v-list-item prepend-icon="mdi-movie-roll" to="/admin/dashboard" title="Admin Dashboard"></v-list-item>
                 <v-list-item prepend-icon="mdi-movie-roll" to="/admin/movie" title="Manage Movies"></v-list-item>
                 <v-list-item prepend-icon="mdi-comment-account-outline" to="/admin/comments" title="Manage Comments"></v-list-item>
                 <v-list-item prepend-icon="mdi-shape-plus" to="/admin/genre" title="Manage Genres"></v-list-item>

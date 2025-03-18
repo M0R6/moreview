@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container id="#">
     <v-row>
       <v-col cols="12">
         <v-card :color="theme.global.name.value === 'customLight' ? 'transparent' : null" class="py-4">
@@ -386,6 +386,63 @@
       </v-col>
     </v-row>
 
+    <v-footer id="about" class="bg-primary">
+    <v-container>
+      <v-row>
+        <v-col cols="12" md="4" class="mb-4 mb-md-0">
+          <h3 class="text-h6 font-weight-bold mb-4 text-white">Moreview</h3>
+          <p class="text-body-2 text-white">Your ultimate destination for movie information and reviews. Browse genres, discover new films, and keep track of your favorites.</p>
+        </v-col>
+        
+        <v-col cols="12" md="4" class="mb-4 mb-md-0">
+          <h3 class="text-subtitle-1 font-weight-bold mb-4 text-white">Quick Links</h3>
+          <v-list class="bg-transparent pa-0">
+            <v-list-item href="/#" class="pa-0 mb-2">
+              <v-list-item-title class="text-white">Home</v-list-item-title>
+            </v-list-item>
+            <v-list-item href="/movie" class="pa-0 mb-2">
+              <v-list-item-title class="text-white">Movies</v-list-item-title>
+            </v-list-item>
+            <v-list-item href="/series" class="pa-0 mb-2">
+              <v-list-item-title class="text-white">Series</v-list-item-title>
+            </v-list-item>
+            <v-list-item href="/#about" class="pa-0">
+              <v-list-item-title class="text-white">About Us</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-col>
+        
+        <v-col cols="12" md="4">
+          <h3 class="text-subtitle-1 font-weight-bold mb-4 text-white">Connect With Us</h3>
+          <div class="d-flex">
+            <!-- <v-btn icon class="mr-4">
+              <v-icon :color="theme.global.name.value === 'customLight' ? 'black' : 'white'">mdi-facebook</v-icon>
+            </v-btn> -->
+            <v-btn icon class="mr-4" href="https://x.com/MoreviewSocial" target="_blank">
+              <v-icon :color="theme.global.name.value === 'customLight' ? 'black' : 'white'">mdi-twitter</v-icon>
+            </v-btn>
+            <v-btn icon class="mr-4" href="https://instagram.com/mrgn.projects" target="_blank">
+              <v-icon :color="theme.global.name.value === 'customLight' ? 'black' : 'white'">mdi-instagram</v-icon>
+            </v-btn>
+            <!-- <v-btn icon>
+              <v-icon :color="theme.global.name.value === 'customLight' ? 'black' : 'white'">mdi-youtube</v-icon>
+            </v-btn> -->
+          </div>
+        </v-col>
+      </v-row>
+      
+      <v-divider class="my-4 bg-white"></v-divider>
+      
+      <div class="d-flex flex-column flex-md-row justify-space-between align-center">
+        <div class="text-center text-md-left text-body-2 text-white">
+          &copy; {{ new Date().getFullYear() }} Moreview. All rights reserved.
+        </div>
+        <div class="mt-3 mt-md-0 text-center text-md-right">
+          <a href="mailto:halomrgn@gmail.com" class="text-decoration-none text-white text-body-2 mr-4">Contact us: halomrgn@gmail.com</a>
+        </div>
+      </div>
+    </v-container>
+  </v-footer>
   </v-container>
 </template>
 
@@ -447,18 +504,22 @@ const getMovies = async () => {
           return bRating - aRating;
         })
         .slice(0, 10);
-      movieOnly.value = data.filter((item) => item.typeMov === "movie");
-      seriesOnly.value = data.filter((item) => item.typeMov === "series");
-      movieOnly.value.sort((a, b) => {
-        const aRating = a.comments.length > 0 ? a.comments.reduce((acc, comment) => acc + comment.rating, 0) / a.comments.length : 0;
-        const bRating = b.comments.length > 0 ? b.comments.reduce((acc, comment) => acc + comment.rating, 0) / b.comments.length : 0;
-        return bRating - aRating;
-      });
-      seriesOnly.value.sort((a, b) => {
-        const aRating = a.comments.length > 0 ? a.comments.reduce((acc, comment) => acc + comment.rating, 0) / a.comments.length : 0;
-        const bRating = b.comments.length > 0 ? b.comments.reduce((acc, comment) => acc + comment.rating, 0) / b.comments.length : 0;
-        return bRating - aRating;
-      });
+      movieOnly.value = data
+        .filter((item) => item.typeMov === "movie")
+        .sort((a, b) => {
+          const aRating = a.comments.length > 0 ? a.comments.reduce((acc, comment) => acc + comment.rating, 0) / a.comments.length : 0;
+          const bRating = b.comments.length > 0 ? b.comments.reduce((acc, comment) => acc + comment.rating, 0) / b.comments.length : 0;
+          return bRating - aRating;
+        })
+        .slice(0, 10);
+      seriesOnly.value = data
+        .filter((item) => item.typeMov === "series")
+        .sort((a, b) => {
+          const aRating = a.comments.length > 0 ? a.comments.reduce((acc, comment) => acc + comment.rating, 0) / a.comments.length : 0;
+          const bRating = b.comments.length > 0 ? b.comments.reduce((acc, comment) => acc + comment.rating, 0) / b.comments.length : 0;
+          return bRating - aRating;
+        })
+        .slice(0, 10);
     }
   } catch (error) {
     console.error("Error fetching movies:", error);

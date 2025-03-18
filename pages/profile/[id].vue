@@ -57,16 +57,39 @@ const editItem = (item) => {
   }
 
   editName.value = item.name
+  editAvatar.value = item.avatar
   editEmail.value = item.email
   editId.value = item.id
   editPass.value = ''
   editItemDialog.value = true
 }
 
+const convertFileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+    });
+};
+
+
+const editAvatar = ref(null);
+
 const updateUser = async () => {
+
+  let photoBase64 = null;
+
+  if (editAvatar.value instanceof File) {
+    photoBase64 = await convertFileToBase64(editAvatar.value);
+  } else {
+    photoBase64 = null; // Keep the existing photo URL
+  }
+
   const requestBody = {
     name: editName.value,
     email: editEmail.value,
+    photo: photoBase64,
   };
 
   if (editPass.value) {
@@ -155,6 +178,13 @@ onMounted(async () => {
          </v-card-title>
          <v-card-text>
            <v-form v-model="editForm" @submit.prevent="updateUser">
+             <v-file-input
+               v-model="editAvatar"
+               label="Avatar"
+               accept="image/*"
+               show-size
+               prepend-icon="mdi-camera"
+              outlined></v-file-input>
              <v-text-field
                v-model="editName"
                label="Name"
