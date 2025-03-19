@@ -53,7 +53,6 @@ const duration = ref("");
 const episode = ref("");
 const rating = ref("");
 const creator = ref("");
-const castings = ref([]);
 const trailer = ref("");
 const trailerUrl = ref("");
 const genreIds = ref([]);
@@ -176,7 +175,6 @@ const addMovie = async () => {
         duration: parseInt(duration.value),
         episode: parseInt(episode.value),
         rating: rating.value,
-        castings: castings.value,
         postedBy: userA.value.id,
         creator: creator.value,
         genreIds: genreIds.value,
@@ -277,7 +275,6 @@ const editMovie = (movie) => {
   episode.value = movie.episode;
   rating.value = movie.rating;
   creator.value = movie.creator;
-  castings.value = movie.cast;
   trailer.value = movie.trailer;
   trailerUrl.value = movie.trailerUrl;
   genreIds.value = movie.genres_relations.map((relation) => relation.genre_id);
@@ -310,7 +307,6 @@ const updateMovie = async () => {
           episode: episode.value,
           rating: rating.value,
           creator: creator.value,
-          castings: castings.value,
           trailer: trailerBase64,
           trailerUrl: trailerUrl.value,
           genreIds: genreIds.value,
@@ -362,7 +358,6 @@ const formNull = () => {
   episode.value = "";
   rating.value = "";
   creator.value = "";
-  castings.value = [];
   trailer.value = "";
   trailerUrl.value = "";
   genreIds.value = [];
@@ -451,6 +446,55 @@ const archiveSelectedFilms = async () => {
     showToast("Error archiiving films", "error");
   }
 };
+
+// Filter states
+const genreFilter = ref(null);
+const yearFilter = ref(null);
+const ratingFilter = ref(null);
+
+// Computed properties
+const releaseYears = computed(() => {
+  const years = [...new Set(movies.value.map(movie => movie.release_year))];
+  return years.sort((a, b) => b - a); // Sort descending
+});
+
+const filtersActive = computed(() => {
+  return genreFilter.value !== null || yearFilter.value !== null || ratingFilter.value !== null;
+});
+
+
+const filteredMovies = computed(() => {
+  if (!filtersActive.value) {
+    return movies.value;
+  }
+  
+  return movies.value.filter(movie => {
+    // Genre filter
+    const genreMatch = !genreFilter.value || 
+      movie.genres_relations.some(relation => relation.genre.id === genreFilter.value);
+    
+    // Year filter
+    const yearMatch = !yearFilter.value || movie.release_year === yearFilter.value;
+    
+    // Rating filter
+    let avgRating = 0;
+    if (movie.comments && movie.comments.length > 0) {
+      const totalRating = movie.comments.reduce((sum, comment) => sum + comment.rating, 0);
+      avgRating = Math.floor(totalRating / movie.comments.length); // No decimal
+    }
+    
+    // Rating filter using the calculated average
+    const ratingMatch = !ratingFilter.value || avgRating === Number(ratingFilter.value);
+    
+    return genreMatch && yearMatch && ratingMatch;
+  });
+});
+
+const resetFilters = () => {
+  genreFilter.value = null;
+  yearFilter.value = null;
+  ratingFilter.value = null;
+};
 </script>
 
 <template>
@@ -537,7 +581,7 @@ const archiveSelectedFilms = async () => {
 
                 <v-list-item>
                   <v-list-item-title class="font-weight-bold"
-                    >Release Date:</v-list-item-title
+                    >Release Year:</v-list-item-title
                   >
                   <v-list-item-subtitle>{{
                     viewMovieData?.release_year ? formatDate(viewMovieData?.release_year) : "-"
@@ -570,15 +614,6 @@ const archiveSelectedFilms = async () => {
                   >
                   <v-list-item-subtitle>{{
                     viewMovieData?.creator || "-"
-                  }}</v-list-item-subtitle>
-                </v-list-item>
-
-                <v-list-item>
-                  <v-list-item-title class="font-weight-bold"
-                    >Castings:</v-list-item-title
-                  >
-                  <v-list-item-subtitle>{{
-                    viewMovieData?.cast || "-"
                   }}</v-list-item-subtitle>
                 </v-list-item>
 
@@ -703,7 +738,7 @@ const archiveSelectedFilms = async () => {
             ></v-textarea>
             <v-text-field
               v-model="releaseYear"
-              label="Release Date"
+              label="Release Year"
               type="number"
               required
               variant="outlined"
@@ -734,11 +769,6 @@ const archiveSelectedFilms = async () => {
               v-model="creator"
               label="Creator"
               required
-              variant="outlined"
-            ></v-text-field>
-            <v-text-field
-              v-model="castings"
-              label="Actor's Name"
               variant="outlined"
             ></v-text-field>
             <v-file-input
@@ -821,19 +851,75 @@ const archiveSelectedFilms = async () => {
           >
              <v-icon left>mdi-delete</v-icon> Delete Selected ({{ selectedFilms.length }})
           </v-btn>
-          <v-text-field
-            :loading="loading"
-            append-inner-icon="mdi-magnify"
-            density="compact"
-            label="Search"
-            placeholder="Search"
-            variant="outlined"
-            width="300"
-            class="my-2"
-            hide-details
-            v-model="search"
-            single-line
-          ></v-text-field>
+          
+          <div class="d-flex flex-wrap gap-2">
+            <v-text-field
+              :loading="loading"
+              append-inner-icon="mdi-magnify"
+              density="compact"
+              label="Search"
+              placeholder="Search"
+              variant="outlined"
+              width="150"
+              class="my-2"
+              hide-details
+              v-model="search"
+              single-line
+            ></v-text-field>
+            
+            <!-- Filter by Genre -->
+            <v-autocomplete
+              v-model="genreFilter"
+              :items="sortedGenres"
+              item-title="title"
+              item-value="id"
+              label="Filter by Genre"
+              density="compact"
+              variant="outlined"
+              class="my-2"
+              hide-details
+              clearable
+              width="150"
+            ></v-autocomplete>
+            
+            <!-- Filter by Release Year -->
+            <v-select
+              v-model="yearFilter"
+              :items="releaseYears"
+              label="Filter by Year"
+              density="compact"
+              variant="outlined"
+              class="my-2"
+              hide-details
+              clearable
+              width="150"
+            ></v-select>
+            
+            <!-- Filter by Rating -->
+            <v-select
+              v-model="ratingFilter"
+              :items="[1, 2, 3, 4, 5]"
+              label="Filter by Rating"
+              density="compact"
+              variant="outlined"
+              class="my-2"
+              hide-details
+              clearable
+              width="150"
+            ></v-select>
+            
+            <!-- Reset filters button -->
+            <v-btn
+              color="primary"
+              variant="text"
+              class="my-2"
+              @click="resetFilters"
+              :disabled="!filtersActive"
+            >
+              <v-icon>mdi-filter-remove</v-icon>
+              Reset Filters
+            </v-btn>
+          </div>
         </div>
       </v-card-title>
       <v-data-table
@@ -848,7 +934,7 @@ const archiveSelectedFilms = async () => {
             key: 'genre_relation',
           },
           {
-            title: 'Release Date',
+            title: 'Release Year',
             align: 'start',
             sortable: true,
             key: 'release_year',
@@ -867,7 +953,6 @@ const archiveSelectedFilms = async () => {
           // },
           { title: 'Rating', align: 'start', sortable: true, key: 'rating' },
           { title: 'Creator', align: 'start', sortable: true, key: 'creator' },
-          { title: 'Castings', align: 'start', sortable: true, key: 'cast' },
           {
             title: 'Created By',
             align: 'start',
@@ -895,7 +980,7 @@ const archiveSelectedFilms = async () => {
           { title: 'Actions', align: 'start', sortable: false, key: 'actions' },
         ]"
         :search="search"
-        :items="movies"
+        :items="filteredMovies"
         :loading="loading"
         :items-per-page="10"
         v-model="selectedFilms"
@@ -1067,11 +1152,6 @@ const archiveSelectedFilms = async () => {
               required
               variant="outlined"
             ></v-text-field>
-            <v-text-field
-              v-model="castings"
-              label="Actor's Name"
-              variant="outlined"
-            ></v-text-field>
             <v-file-input
               @input="handlePosterInput"
               v-model="poster"
@@ -1091,7 +1171,7 @@ const archiveSelectedFilms = async () => {
               label="Trailer URL"
               variant="outlined"
             ></v-text-field>
-            <v-select
+            <v-autocomplete
               v-model="genreIds"
               :items="sortedGenres"
               item-title="title"
@@ -1099,7 +1179,9 @@ const archiveSelectedFilms = async () => {
               label="Genres"
               multiple
               variant="outlined"
-            ></v-select>
+              chips
+              closable-chips
+            ></v-autocomplete>
             <v-btn type="submit" color="primary">Update Movie</v-btn>
             <v-btn @click="formNull" class="ml-2">Cancel</v-btn>
           </v-form>

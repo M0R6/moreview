@@ -52,7 +52,6 @@ const episode = ref("");
 const rating = ref("");
 const movieType = ref("")
 const creator = ref("");
-const castings = ref([]);
 const trailer = ref("");
 const genreIds = ref([]);
 const form = ref(false);
@@ -170,7 +169,6 @@ const addMovie = async () => {
         duration: parseInt(duration.value),
         episode: episode.value,
         rating: rating.value,
-        castings: castings.value,
         postedBy: userA.value.id,
         creator: creator.value,
         genreIds: genreIds.value,
@@ -267,7 +265,6 @@ const editMovie = (movie) => {
   episode.value = movie.episode;
   rating.value = movie.rating;
   creator.value = movie.creator;
-  castings.value = movie.cast;
   trailer.value = movie.trailer;
   genreIds.value = movie.genres_relations.map((relation) => relation.genre_id);
   editMovieDialog.value = true;
@@ -297,7 +294,6 @@ const updateMovie = async () => {
           episode: episode.value,
           rating: rating.value,
           creator: creator.value,
-          castings: castings.value,
           trailer: trailerBase64,
           genreIds: genreIds.value,
         },
@@ -346,7 +342,6 @@ const formNull = () => {
   episode.value = "";
   rating.value = "";
   creator.value = "";
-  castings.value = [];
   trailer.value = "";
   genreIds.value = [];
   form.value = false;
@@ -450,15 +445,6 @@ const viewMovie = (movie) => {
                   >
                   <v-list-item-subtitle>{{
                     viewMovieData?.creator || "-"
-                  }}</v-list-item-subtitle>
-                </v-list-item>
-
-                <v-list-item>
-                  <v-list-item-title class="font-weight-bold"
-                    >Castings:</v-list-item-title
-                  >
-                  <v-list-item-subtitle>{{
-                    viewMovieData?.cast || "-"
                   }}</v-list-item-subtitle>
                 </v-list-item>
 
@@ -616,11 +602,6 @@ const viewMovie = (movie) => {
               required
               variant="outlined"
             ></v-text-field>
-            <v-text-field
-              v-model="castings"
-              label="Actor's Name"
-              variant="outlined"
-            ></v-text-field>
             <v-file-input
               hide-details
               @input="handlePosterInput"
@@ -721,7 +702,6 @@ const viewMovie = (movie) => {
           },
           { title: 'Rating', align: 'start', sortable: true, key: 'rating' },
           { title: 'Creator', align: 'start', sortable: true, key: 'creator' },
-          { title: 'Castings', align: 'start', sortable: true, key: 'cast' },
           {
             title: 'Created Date',
             align: 'start',
@@ -881,11 +861,6 @@ const viewMovie = (movie) => {
               v-model="creator"
               label="Creator"
               required
-              variant="outlined"
-            ></v-text-field>
-            <v-text-field
-              v-model="castings"
-              label="Actor's Name"
               variant="outlined"
             ></v-text-field>
             <v-file-input

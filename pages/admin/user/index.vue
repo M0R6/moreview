@@ -45,6 +45,7 @@ const showToast = inject('showToast')
 const theme = inject('theme')
 const name = ref('')
 const email = ref('')
+const notlp = ref('')
 const role = ref('subs')
 const password = ref('')
 const form = ref(false)
@@ -56,6 +57,7 @@ const addUser = async () => {
         body: {
             name: name.value,
             email: email.value,
+            notlp: notlp.value,
             role: role.value,
             password: password.value,
         }
@@ -145,6 +147,7 @@ const editItemDialog = ref(false)
 const editForm = ref(false)
 const editName = ref('')
 const editEmail = ref('')
+const editNotlp = ref('')
 const editRole = ref('')
 const editId = ref(null)
 const editPass = ref('')
@@ -152,6 +155,7 @@ const editPass = ref('')
 const editItem = (item) => {
     editName.value = item.name
     editEmail.value = item.email
+    editNotlp.value = item.notlp
     editRole.value = item.role
     editId.value = item.id
     editPass.value = ''
@@ -162,6 +166,7 @@ const updateUser = async () => {
     const requestBody = {
         name: editName.value,
         email: editEmail.value,
+        notlp: editNotlp.value,
         role: editRole.value,
     }
 
@@ -314,6 +319,11 @@ onMounted(() => {
                      required
                      variant="outlined"
                   ></v-text-field>
+                  <v-text-field
+                     v-model="editNotlp"
+                     label="Nomor telepon"
+                     variant="outlined"
+                  ></v-text-field>
                   <v-select
                      v-model="editRole"
                      :items="['admin', 'author', 'subs']"
@@ -397,6 +407,11 @@ onMounted(() => {
                      v-model="email"
                      label="E-mail"
                      required
+                     variant="outlined"
+                  ></v-text-field>
+                  <v-text-field
+                     v-model="notlp"
+                     label="Nomor telepon"
                      variant="outlined"
                   ></v-text-field>
                   <v-select

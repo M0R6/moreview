@@ -26,6 +26,7 @@ const editItemDialog = ref(false)
 const editForm = ref(false)
 const editName = ref('')
 const editEmail = ref('')
+const editNotlp = ref('')
 const editId = ref(null)
 const editPass = ref('')
 
@@ -59,6 +60,7 @@ const editItem = (item) => {
   editName.value = item.name
   editAvatar.value = item.avatar
   editEmail.value = item.email
+  editNotlp.value = item.notlp
   editId.value = item.id
   editPass.value = ''
   editItemDialog.value = true
@@ -150,6 +152,10 @@ onMounted(async () => {
            <v-list-item>
              <v-list-item-title>Email</v-list-item-title>
              <v-list-item-subtitle>{{ userProfile.email }}</v-list-item-subtitle>
+           </v-list-item>
+           <v-list-item>
+             <v-list-item-title>No. Telp</v-list-item-title>
+             <v-list-item-subtitle>{{ userProfile.notlp }}</v-list-item-subtitle>
            </v-list-item>
            <v-list-item>
              <v-list-item-title>Registered at</v-list-item-title>

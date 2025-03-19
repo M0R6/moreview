@@ -25,6 +25,7 @@ export default defineEventHandler(async (event) => {
         data: {
             name: body.name,
             email: body.email,
+            notlp: body.notlp,
             password: await hash(body.password, 12),
             role: body.role || 'subs', // Assuming a default role of 'user'
             isActive: true, // Assuming new users are active by default

@@ -80,7 +80,6 @@ export default defineEventHandler(async (event) => {
      episode: parseInt(body.episode) || null,
      rating: body.rating,
      creator: body.creator,
-     cast: body.castings,
      trailer: trailerPath !== null ? trailerPath : currentFilm.trailer,
      trailerUrl: body.trailerUrl,
      updated_at: new Date(),

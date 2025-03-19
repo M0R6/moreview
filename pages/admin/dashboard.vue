@@ -106,7 +106,7 @@
       </v-col>
 
       <v-col cols="12" md="6">
-        <v-card elevation="3" class="rounded-lg">
+        <v-card height="100%" elevation="3" class="rounded-lg">
           
           <v-divider></v-divider>
           
@@ -116,15 +116,15 @@
                 <v-avatar color="primary" size="80" class="elevation-3 mb-4">
                   <v-icon size="50" color="white">mdi-shape-outline</v-icon>
                 </v-avatar>
-                <span class="text-body-1 font-weight-medium text-primary">Movies by genres</span>
+                <span class="text-body-1 font-weight-medium text-primary text-center">New Added</span>
               </div>
               
               <div class="d-flex align-center">
                 <v-list>
-                  <v-list-item v-for="(count, genre) in genreCounts" :key="genre">
+                  <v-list-item v-for="movie in latestMovie" :key="movie.id">
                     <v-list-item-content>
-                      <v-list-item-title>{{ genre }}</v-list-item-title>
-                      <v-list-item-subtitle>{{ count }} movies</v-list-item-subtitle>
+                      <v-list-item-title>{{ movie.title }}</v-list-item-title>
+                      <v-list-item-subtitle>{{ formatDate(movie.created_at) }}</v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
                 </v-list>
@@ -140,6 +140,15 @@
           </v-card-actions>
         </v-card>
       </v-col>
+
+      <v-col cols="12" md="6">
+        <v-card>
+          <v-card-title>Movie Ratings Distribution</v-card-title>
+          <v-card-text>
+            <canvas ref="chart"></canvas>
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -147,9 +156,48 @@
 <script setup>
 import { useHead, useAuth } from "#imports";
 import { ref, computed, inject } from "vue";
+import { Chart, registerables } from "chart.js";
+
+Chart.register(...registerables);
+
+const chart = ref(null);
+
+const ratingDistribution = computed(() => {
+  const ratingCounts = Array(5).fill(0);
+
+  // Count movies for each rating
+  movies.value.forEach(movie => {
+    if (movie.comments && movie.comments.length > 0) {
+      const totalRating = movie.comments.reduce((sum, comment) => sum + comment.rating, 0);
+      const avgRating = Math.round(totalRating / movie.comments.length);
+      
+      if (avgRating >= 1 && avgRating <= 5) {
+        ratingCounts[avgRating - 1]++;
+      }
+    }
+  });
+
+  return ratingCounts;
+});
 
 const showToast = inject("showToast");
 const { data } = useAuth();
+
+const { $moment } = useNuxtApp();
+
+const formatDate = (date) => {
+  if (!date) return "-";
+
+  const momentDate = $moment.utc(date).tz("Asia/Jakarta").locale("id");
+
+  if (momentDate.isSame($moment(), "day")) {
+    return `Today at ${momentDate.format("HH:mm:ss")}`;
+  } else if (momentDate.isSame($moment().subtract(1, "day"), "day")) {
+    return `Yesterday at ${momentDate.format("HH:mm:ss")}`;
+  } else {
+    return momentDate.format("LLLL");
+  }
+};
 
 const userA = ref(null);
 const isAdmin = computed(() => userA.value?.role === "admin");
@@ -171,7 +219,7 @@ const getAuthUser = async () => {
       showToast("Access denied", "error");
       setTimeout(() => {
         navigateTo("/")
-      }, 3000);
+      }, 1000);
     }
   } catch (error) {
     console.error("Error fetching user:", error);
@@ -179,6 +227,8 @@ const getAuthUser = async () => {
 };
 
 const movies = ref([]);
+const latestMovie = ref([]);
+const mostPopular = ref([]);
 const fetchMovies = async () => {
   try {
     const response = await fetch("/api/movie/getMovie");
@@ -187,6 +237,16 @@ const fetchMovies = async () => {
     }
     const data = await response.json();
     movies.value = data || [];
+    if (Array.isArray(data) && data.length > 0) {
+      latestMovie.value = data
+        .slice()
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 10);
+      mostPopular.value = data
+        .slice()
+        .sort((a, b) => b.comments.length - a.comments.length)
+        .slice(0, 10);
+    }
     console.log([data]);
   } catch (error) {
     console.error("Error fetching movies:", error);
@@ -223,11 +283,31 @@ const fetchUsers = async () => {
   }
 };
 
-onMounted(() => {
-  getAuthUser();
-  fetchMovies();
-  fetchComments();
-  fetchUsers();
+onMounted(async () => {
+  await getAuthUser();
+  await fetchMovies();
+  await fetchComments();
+  await fetchUsers();
+  new Chart(chart.value, {
+    type: "bar",
+    data: {
+      labels: ["1", "2", "3", "4", "5"],
+      datasets: [
+        {
+          label: "Number of Movies",
+          data: ratingDistribution.value,
+          backgroundColor: "#42b983",
+        },
+      ],
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+    },
+  });
 });
 
 useHead({

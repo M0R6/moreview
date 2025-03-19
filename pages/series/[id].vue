@@ -77,6 +77,9 @@
               >
                 {{ movie.title }}
               </v-card-title>
+              <v-card-title class="px-0 py-1 text-subtitle text-white font-weight-medium">
+                Film created by: <span class="text-decoration-underline">{{ movie.creator }}</span>
+              </v-card-title>
               <v-card-subtitle class="px-0 text-white">
                 {{
                   movie.release_year + " • " + movie.episode + " episodes" + " • "
@@ -259,7 +262,7 @@
             >
               <v-list style="background-color: transparent">
                 <v-list-item>
-                  <v-list-item-title class="d-flex align-center mb-3">
+                  <v-list-item-title class="d-flex a  lign-center mb-3">
                     <v-avatar v-if="comment.user.photo">
                       <v-img :src="comment.user.photo" alt="avatar"></v-img>
                     </v-avatar>
@@ -340,7 +343,9 @@
 <style>
 .v-slide-group__prev,
 .v-slide-group__next {
-  display: none !important;
+  display: block !important;
+  display: flex !important;
+  color: white !important;
 }
 </style>
 

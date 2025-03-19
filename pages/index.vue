@@ -438,13 +438,20 @@
           &copy; {{ new Date().getFullYear() }} Moreview. All rights reserved.
         </div>
         <div class="mt-3 mt-md-0 text-center text-md-right">
-          <a href="mailto:halomrgn@gmail.com" class="text-decoration-none text-white text-body-2 mr-4">Contact us: halomrgn@gmail.com</a>
+          <a href="mailto:halomrgn@gmail.com" class="text-decoration-none text-white text-body-2 mr-4">Approach us at <span class="text-decoration-underline">halomrgn@gmail.com</span></a>
         </div>
       </div>
     </v-container>
   </v-footer>
   </v-container>
 </template>
+
+<style>
+.v-slide-group__prev,
+.v-slide-group__next {
+  display: none !important;
+}
+</style>
 
 <script setup>
 import { useHead } from "#imports";   

@@ -44,6 +44,7 @@ export default defineEventHandler(async (event) => {
     await prisma.users.create({
         data: {
             email: body.email.toLowerCase(),
+            notlp: body.notlp,
             name: body.name,
             password: await hash(body.password, 12),
             photo: profilePath,

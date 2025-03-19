@@ -26,6 +26,7 @@ const name = ref("");
 const email = ref("");
 const photo = ref([]);
 const password = ref("");
+const notlp = ref("")
 
 const form = ref(false);
 const nameRules = [
@@ -68,6 +69,7 @@ const register = async () => {
             body: {
                 name: name.value,
                 email: email.value,
+                notlp: notlp.value,
                 photo: photoBase64,
                 password: password.value,
             },
@@ -135,6 +137,11 @@ const showPassword = ref(false);
                   v-model="email"
                   label="Email"
                   :rules="emailRules"
+                ></v-text-field>
+                <v-text-field
+                  variant="outlined"
+                  v-model="notlp"
+                  label="Nomor telepon"
                 ></v-text-field>
                 <v-text-field
                   variant="outlined"

@@ -11,8 +11,8 @@ model users {
   id                String    @id @default(uuid())
   name              String
   email             String    @unique
+  notlp             String?       
   password          String
-
   photo             String?
   role              Role
   deleted_at        DateTime?
@@ -32,14 +32,13 @@ model Film {
   title             String
   poster            String?
   typeMov           movieType @default(movie)
-  description       String?
+  description       String    @db.Text
   release_year      Int
   duration          Int?
   episode           Int?
   rating            Rate
   watchlist         Int?
   creator           String
-  cast              String
   trailer           String?
   trailerUrl        String?
   postedBy          String

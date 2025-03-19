@@ -61,7 +61,6 @@ export default defineEventHandler(async (event) => {
       trailer: trailerPath,
       trailerUrl: body.trailerUrl,
       creator: body.creator,
-      cast: body.castings,
       postedBy: body.postedBy,
       created_at: new Date(),
       updated_at: new Date(),

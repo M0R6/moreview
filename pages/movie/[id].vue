@@ -322,7 +322,9 @@
 <style>
 .v-slide-group__prev,
 .v-slide-group__next {
-  display: none !important;
+  display: block !important;
+  display: flex !important;
+  color: white !important;
 }
 </style>
 
