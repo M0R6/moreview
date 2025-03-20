@@ -36,13 +36,6 @@ export default defineEventHandler(async (event) => {
       },
     });
 
-    if (!cast || cast.length === 0) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'No cast is created by this author',
-      });
-    }
-
     return cast;
   } catch (error) {
     console.error('Error fetching casts:', error);

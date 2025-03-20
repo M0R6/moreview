@@ -1,6 +1,8 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import { useHead } from "#imports";
+
+const theme = inject("theme");
 
 useHead({
   title: "Manage Cast - Moreview",
