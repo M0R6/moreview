@@ -1,6 +1,8 @@
 # Moreview
 
-Moreview is an application developed by Morgan for movies & tv-shows enthusiasts to give their thoughts about movies they'd watched. This application is built using **Nuxt.js** for the frontend and **Nuxt.js Server** for the backend, with **MySQL** as the database. Originally this project is for a a test, UKK (Uji Kompetensi Keahlian).
+Moreview is an application developed by Morgan for movies & tv-shows enthusiasts to give their thoughts about movies they'd watched. This application is built using **Nuxt.js** for the frontend and **Nuxt.js Server** for the backend, with **MySQL** as the database. Originally this project is for a a test, UKK (Uji Kompetensi Keahlian). 
+
+This project is hosted at [https://moreview.social/](https://moreview.social/).
 
 ## 📌 Installation & Configuration
 
