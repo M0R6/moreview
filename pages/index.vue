@@ -63,7 +63,7 @@
                 <span class="text-truncate text-center font-weight-medium">{{ movie.title }}</span>
               </v-card-title>
             
-              <v-card-text class="px-3 pt-1 pb-2">
+              <v-card-text class="px-3 pt-1 pb-2 justify-center d-flex">
                 <v-chip-group 
                   class="d-flex justify-space-between flex-wrap" 
                   @click.stop
@@ -155,7 +155,7 @@
                 <span class="text-truncate text-center font-weight-medium">{{ movie.title }}</span>
               </v-card-title>
             
-              <v-card-text class="px-3 pt-1 pb-2">
+              <v-card-text class="px-3 pt-1 pb-2 justify-center d-flex">
                 <v-chip-group 
                   class="d-flex justify-space-between flex-wrap" 
                   @click.stop
@@ -247,7 +247,7 @@
                 <span class="text-truncate text-center font-weight-medium">{{ movie.title }}</span>
               </v-card-title>
             
-              <v-card-text class="px-3 pt-1 pb-2">
+              <v-card-text class="px-3 pt-1 pb-2 justify-center d-flex">
                 <v-chip-group 
                   class="d-flex justify-space-between flex-wrap" 
                   @click.stop
@@ -339,7 +339,7 @@
                 <span class="text-truncate text-center font-weight-medium">{{ movie.title }}</span>
               </v-card-title>
             
-              <v-card-text class="px-3 pt-1 pb-2">
+              <v-card-text class="px-3 pt-1 pb-2 justify-center d-flex">
                 <v-chip-group 
                   class="d-flex justify-space-between flex-wrap" 
                   @click.stop
